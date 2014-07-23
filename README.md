@@ -5,11 +5,13 @@
 * Please build the iohub library. 
 
 * Set up toolchain for Edison. 
+
 ```shell
 source /opt/poky-edison/1.5.1/environment-setup-i586-poky-linux
 ```
 
 * Build libmug.a
+
 ```shell
 make
 ```
@@ -19,4 +21,3 @@ make
 ```shell
 make test
 ```
-
