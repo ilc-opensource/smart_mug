@@ -7,8 +7,8 @@ SRC_PATH=./
 BUILD_PATH=build
 
 ## Edit #######################################
-TARGET=$(BIN_PATH)/animation
-SRCS=animation.cpp
+TARGET=$(BIN_PATH)/show_image
+SRCS=show_image.cpp
 ###############################################
 
 C_FLAGS=-O0 -g -I$(INC_PATH) -Iinclude

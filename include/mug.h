@@ -19,8 +19,28 @@ typedef enum {
 } error_t;
 #endif
 
-extern handle_t mug_init();
-extern void     mug_close(handle_t handle);
-extern error_t  mug_disp_raw(handle_t handle, char* imgData);
-extern error_t  mug_disp_raw_N(handle_t handle, char* imgData, int number, int interval);
+#define IMG_OK 0
+#define IMG_ERROR -1
+
+#ifdef __cplusplus
+#define PREFIX extern "C" 
+#else
+#define PREFIX extern
+#endif
+
+// device control
+PREFIX handle_t mug_init();
+PREFIX void     mug_close(handle_t handle);
+
+// display
+PREFIX error_t  mug_disp_raw(handle_t handle, char* imgData);
+PREFIX error_t  mug_disp_raw_N(handle_t handle, char* imgData, int number, int interval);
+
+// raw image buffer
+PREFIX char* mug_create_raw_buffer();
+PREFIX void  mug_free_raw_buffer(char *buf);
+
+// image
+PREFIX int   mug_read_img(char *fname, char *buf);
+PREFIX int   mug_disp_img(handle_t handle, char* name); 
 #endif

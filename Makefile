@@ -11,10 +11,11 @@ SRC_PATH=src
 BUILD_PATH=build
 TARGET=$(BIN_PATH)/libmug.a
 
-SRCS=disp.c
+SRCS=disp.cpp image.cpp
 
-C_FLAGS=-O0 -g -I$(INC_PATH) -Iinclude
-OBJS=$(addprefix $(BUILD_PATH)/, $(SRCS:.c=.o))
+C_FLAGS=-O0 -g -I$(INC_PATH) -Iinclude -Ilib/CImg
+
+OBJS=$(addprefix $(BUILD_PATH)/, $(SRCS:.cpp=.o))
 
 all: init $(TARGET) end
 
@@ -29,8 +30,8 @@ $(TARGET):$(OBJS)
 	cp $(LIB_PATH)/libiohub-client.a $(TARGET)
 	ar -rc $@ $^
 
-$(BUILD_PATH)/%.o: $(SRC_PATH)/%.c
-	$(CC) $(C_FLAGS) -c $< -o $@
+$(BUILD_PATH)/%.o: $(SRC_PATH)/%.cpp
+	$(CXX) $(C_FLAGS) -c $< -o $@
 
 test:
 	make -C test
