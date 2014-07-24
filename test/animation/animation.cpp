@@ -10,7 +10,11 @@ int main(int argc, char** argv)
     printf("please input image: \n");
     return 0;
   }
-
+#if 1
+  handle_t handle = mug_init();
+  mug_disp_img_N(handle, argv[1]);
+  mug_close(handle);
+#else
   int img_num = argc - 1;
   
   char *raw, *p;
@@ -30,6 +34,7 @@ int main(int argc, char** argv)
   mug_disp_raw_N(handle, raw, img_num, 200);
 
   mug_close(handle); 
+#endif
 
   return 0;
 }

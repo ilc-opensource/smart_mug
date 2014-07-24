@@ -1,5 +1,8 @@
 #include <mug.h>
 
+#include <list>
+using namespace std;
+
 #define cimg_display 0
 #include <CImg.h>
 using namespace cimg_library;
@@ -83,5 +86,54 @@ int mug_disp_img(handle_t handle, char* name) {
   mug_free_raw_buffer(buf);
  
   return IMG_OK;
+}
+
+char* mug_read_img_N(char* names, int *num)
+{
+  char *p = (char*)malloc(strlen(names) + 1);
+  strcpy(p, names);
+
+  list<char*> parsed;
+
+  *num = 0;
+  char *head = p;
+  while(*p != '\0') {
+    if(*p == ',' || *p == ';') {
+      (*p) = '\0';
+      parsed.push_back(head);
+      head = p + 1;
+    }
+    p++;
+  };
+
+  if(p != head) {
+    parsed.push_back(head);
+  }
+
+  (*num) = parsed.size();
+  char *raw = (char*)malloc(COMPRESSED_SIZE * parsed.size());
+  p = raw;
+  int err;
+ 
+  for(list<char*>::iterator itr = parsed.begin();
+      itr != parsed.end();
+      itr++) {
+    printf("+%s\n", *itr);
+    err = mug_read_img(*itr, p);
+    if(err != IMG_OK)
+      return 0;
+ 
+    p += COMPRESSED_SIZE;
+  }
+
+  return raw;
+}
+
+PREFIX int mug_disp_img_N(handle_t handle, char *names)
+{
+  int num;
+  char *raw = mug_read_img_N(names, &num);
+
+  mug_disp_raw_N(handle, raw, num, 200); 
 }
 

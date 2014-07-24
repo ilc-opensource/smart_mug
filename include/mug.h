@@ -43,4 +43,8 @@ PREFIX void  mug_free_raw_buffer(char *buf);
 // image
 PREFIX int   mug_read_img(char *fname, char *buf);
 PREFIX int   mug_disp_img(handle_t handle, char* name); 
+
+PREFIX char* mug_read_img_N(char* names, int *num);
+PREFIX int   mug_disp_img_N(handle_t handle, char *names);
+
 #endif
