@@ -11,7 +11,7 @@ SRC_PATH=src
 BUILD_PATH=build
 TARGET=$(BIN_PATH)/libmug.a
 
-SRCS=disp.cpp image.cpp
+SRCS=disp.cpp image.cpp mug.cpp
 
 C_FLAGS=-O0 -g -I$(INC_PATH) -Iinclude -Ilib/CImg
 

@@ -11,9 +11,13 @@ int main(int argc, char** argv)
     return 0;
   }
 #if 1
+/*
   handle_t handle = mug_init();
-  mug_disp_img_N(handle, argv[1]);
+  mug_disp_img_N(handle, argv[1], atoi(argv[2]));
   mug_close(handle);
+*/
+  Mug mug;
+  mug.dispImgs(argv[1], atoi(argv[2]));
 #else
   int img_num = argc - 1;
   

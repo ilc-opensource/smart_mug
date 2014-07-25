@@ -23,28 +23,40 @@ typedef enum {
 #define IMG_ERROR -1
 
 #ifdef __cplusplus
-#define PREFIX extern "C" 
-#else
-#define PREFIX extern
+extern "C" { 
 #endif
 
 // device control
-PREFIX handle_t mug_init();
-PREFIX void     mug_close(handle_t handle);
+handle_t mug_init();
+void     mug_close(handle_t handle);
 
 // display
-PREFIX error_t  mug_disp_raw(handle_t handle, char* imgData);
-PREFIX error_t  mug_disp_raw_N(handle_t handle, char* imgData, int number, int interval);
+error_t  mug_disp_raw(handle_t handle, char* imgData);
+error_t  mug_disp_raw_N(handle_t handle, char* imgData, int number, int interval);
 
 // raw image buffer
-PREFIX char* mug_create_raw_buffer();
-PREFIX void  mug_free_raw_buffer(char *buf);
+char* mug_create_raw_buffer();
+void  mug_free_raw_buffer(char *buf);
 
 // image
-PREFIX int   mug_read_img(char *fname, char *buf);
-PREFIX int   mug_disp_img(handle_t handle, char* name); 
+int   mug_read_img(char *fname, char *buf);
+int   mug_disp_img(handle_t handle, char* name); 
 
-PREFIX char* mug_read_img_N(char* names, int *num);
-PREFIX int   mug_disp_img_N(handle_t handle, char *names);
+char* mug_read_img_N(char* names, int *num);
+int   mug_disp_img_N(handle_t handle, char *names, int interval);
 
+#ifdef __cplusplus
+}
+#endif
+
+class Mug {
+public: 
+  Mug();
+  ~Mug();
+  int dispRaw(char* data, int number = 1, int interval = 40);
+  int dispImgs(char* names, int interval = 40);
+
+private:
+  handle_t m_handle;
+};
 #endif

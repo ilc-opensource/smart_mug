@@ -57,6 +57,8 @@ int mug_read_img(char *fname, char *buf)
       } 
     }
   }
+
+  return IMG_OK;
 }
 
 char* mug_create_raw_buffer() {
@@ -120,8 +122,10 @@ char* mug_read_img_N(char* names, int *num)
       itr++) {
     printf("+%s\n", *itr);
     err = mug_read_img(*itr, p);
-    if(err != IMG_OK)
+    if(err != IMG_OK) {
+      printf("read image %s error\n", *itr);
       return 0;
+    }
  
     p += COMPRESSED_SIZE;
   }
@@ -129,11 +133,11 @@ char* mug_read_img_N(char* names, int *num)
   return raw;
 }
 
-PREFIX int mug_disp_img_N(handle_t handle, char *names)
+int mug_disp_img_N(handle_t handle, char *names, int interval)
 {
   int num;
   char *raw = mug_read_img_N(names, &num);
 
-  mug_disp_raw_N(handle, raw, num, 200); 
+  mug_disp_raw_N(handle, raw, num, interval); 
 }
 
