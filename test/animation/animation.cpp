@@ -6,8 +6,8 @@
 int main(int argc, char** argv)
 {
 
-  if(argc == 1) {
-    printf("please input image: \n");
+  if(argc < 3) {
+    printf("please input image list separate with , and image number: \n");
     return 0;
   }
 #if 1

@@ -79,13 +79,18 @@ error_t mug_disp_raw_N(handle_t handle, char* imgData, int number, int interval)
   return error;
 }
 
-handle_t mug_init() 
+handle_t mug_init(device_t type) 
 {
-  handle_t handle = iohub_open_session(DEVICE_LED);
+  handle_t handle = iohub_open_session(type);
   return handle;
 }
 
 void mug_close(handle_t handle)
 {
   iohub_close_session(handle);
+}
+
+handle_t mug_disp_init()
+{
+  return mug_init(DEVICE_LED);
 }

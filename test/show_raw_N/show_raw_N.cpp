@@ -5,7 +5,7 @@ char frames[] = {0,16,1,0,1,0,0,1,17,17,17,17,17,17,0,1,0,16,1,0,1,0,17,1,0,0,0,
 
 int main()
 {
-  handle_t handle = mug_init();
+  handle_t handle = mug_disp_init();
 
   while(1) {
     mug_disp_raw_N(handle, frames, sizeof(frames)/COMPRESSED_SIZE, 200);

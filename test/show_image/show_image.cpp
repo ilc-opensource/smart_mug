@@ -10,7 +10,7 @@ int main(int argc, char** argv)
     return 0;
   }
 
-  handle_t handle = mug_init();
+  handle_t handle = mug_disp_init();
   
   mug_disp_img(handle, argv[1]); 
 

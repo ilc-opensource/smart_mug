@@ -4,7 +4,7 @@ char house[] = {0,68,68,68,68,20,68,0,0,68,68,20,65,20,68,0,0,68,68,17,17,20,68,
 
 int main()
 {
-  handle_t handle = mug_init();
+  handle_t handle = mug_disp_init();
   
   mug_disp_raw(handle, house);
 
