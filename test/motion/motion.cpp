@@ -19,11 +19,18 @@ int main(int argc, char** argv)
   handle_t handle;
 
   handle = mug_motion_sensor_init();
+
+  if(!handle) {
+    printf("can not initialize sensor\n");
+    exit(1);
+  }
+
+  printf("handle: 0%x\n", handle);
   
   while(1) {
     mug_read_motion_sensor(handle, &data);
     mug_read_motion_sensor_async(handle, dump);
-    printf("ax:%8d, ay:%8d, az:%8d, gx:%8d, gy:%8d, gz:%8d\n",
+    printf("      ax:%8d, ay:%8d, az:%8d, gx:%8d, gy:%8d, gz:%8d\n",
            data.ax, data.ay, data.az, data.gx, data.gy, data.gz);
     usleep(500*1000);
   }

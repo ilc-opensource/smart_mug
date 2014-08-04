@@ -42,6 +42,9 @@ clean:
 	rm -rf bin
 	make clean -C test
 
+clean_test:
+	make clean -C test
+
 .PHONY: clean all test
 
 
