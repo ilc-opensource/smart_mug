@@ -1,5 +1,5 @@
 #include <string.h>
-#include <mug.h>
+#include <mug_cpp.h>
 
 Mug::Mug() 
 {

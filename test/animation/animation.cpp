@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <mug.h>
+#include <mug_cpp.h>
 
 #define IMG "./test.bmp"
 int main(int argc, char** argv)

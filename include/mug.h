@@ -86,23 +86,4 @@ void     mug_read_motion_sensor_async(handle_t handle, motion_cb_t cb);
 }
 #endif
 
-#ifdef __cplusplus
-class Mug {
-public: 
-  Mug();
-  ~Mug();
-  int dispRaw(char* data, int number = 1, int interval = 40);
-  int dispImgs(char* names, int interval = 40);
-  error_t readMotion(motion_data_t *data);
-private:
-  handle_t *m_handles;
-  int       m_handleNum;
-
-  handle_t  initHandle(device_t type);
-  void      closeHandles();
-
-  handle_t  getHandle(device_t type);
-};
-#endif
-
 #endif
