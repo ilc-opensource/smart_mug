@@ -1,13 +1,7 @@
+TESTS= show_raw show_raw_N animation show_image motion touch temprature
+
 all:
-	make -C show_raw
-	make -C show_raw_N
-	make -C animation
-	make -C show_image
-	make -C motion
+	@for i in $(TESTS); do make -C $$i; done
 
 clean:
-	make clean -C show_raw
-	make clean -C show_raw_N
-	make clean -C animation
-	make clean -C show_image
-	make clean -C motion
+	@for i in $(TESTS); do make clean -C $$i; done

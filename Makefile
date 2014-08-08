@@ -11,14 +11,14 @@ SRC_PATH=src
 BUILD_PATH=build
 TARGET=$(BIN_PATH)/libmug.a
 
-SRCS=disp.cpp image.cpp mug.cpp motion.cpp
+SRCS=disp.cpp image.cpp mug.cpp motion.cpp touch.cpp temprature.cpp
 
 C_FLAGS=-O0 -g -I$(INC_PATH) -Iinclude -Ilib/CImg -Ilib/libuv/include
 LD_FLAGS=-luv -lpthread -lrt
 
 OBJS=$(addprefix $(BUILD_PATH)/, $(SRCS:.cpp=.o))
 
-all: init $(TARGET) end
+all: init $(TARGET) test end
 
 end:
 	@echo "done"
@@ -37,7 +37,7 @@ $(BUILD_PATH)/%.o: $(SRC_PATH)/%.cpp
 test:
 	make -C test
 
-clean:
+clean: clean_test
 	rm -rf build
 	rm -rf bin
 	make clean -C test

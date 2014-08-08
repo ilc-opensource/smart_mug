@@ -49,6 +49,52 @@ typedef enum {
 #define IMG_OK           0
 #define IMG_ERROR        1
 
+typedef struct _temp_data_t 
+{
+  int board_temp;
+  int mug_temp;
+  int battery_temp;
+}temp_data_t;
+
+typedef struct _touch_point_t
+{
+  int x, y;
+  int pressure;
+  int tracking_id;
+  int touch_major;
+} touch_point_t;
+
+typedef enum {
+  MUG_NO_GESTURE = 0,
+
+  MUG_SWIPE,
+  MUG_SWIPE_LEFT,
+  MUG_SWIPE_RIGHT,
+  MUG_SWIPE_UP,
+  MUG_SWIPE_DOWN,
+
+  MUG_TOUCH,
+  MUG_TOUCH_DOWN,
+  MUG_TOUCH_UP,
+  MUG_HODE,
+
+  MUG_SWIPE_2,
+  MUG_SWIPE_LEFT_2,
+  MUG_SWIPE_RIGHT_2,
+  MUG_SWIPE_UP_2,
+  MUG_SWIPE_DOWN_2,
+  MUG_TOUCH_2,
+  MUG_TOUCH_DOWN_2,
+  MUG_TOUCH_UP_2,
+  MUG_HODE_2,
+
+  MUG_GESTURE_NUM
+
+}gesture_t;
+
+typedef void (*gesture_cb_t)(gesture_t, char* info);
+typedef void (*touch_cb_t)(int x, int y, int id);
+
 #ifdef __cplusplus
 extern "C" { 
 #endif
@@ -81,6 +127,15 @@ handle_t mug_motion_sensor_init();
 error_t  mug_read_motion_sensor(handle_t handle, motion_data_t *data);
 void     mug_read_motion_sensor_async(handle_t handle, motion_cb_t cb);
 
+// temprature
+handle_t mug_temp_init();
+void     mug_read_temp(handle_t handle, temp_data_t *data);
+
+// touch panel
+handle_t mug_touch_init();
+void     mug_touch_on(touch_cb_t cb);
+void     mug_gesture_on(gesture_t g, gesture_cb_t cb);
+void     mug_touch_loop(handle_t handle);
 
 #ifdef __cplusplus
 }
