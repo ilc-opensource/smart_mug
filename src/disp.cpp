@@ -10,25 +10,6 @@ struct __attribute__((packed)) led_line_data {
   uint8_t content[MAX_COLS/2];
 };
 
-static void it8350_read_adc(handle_t handle)
-{
-  uint16_t data[3];
-  memset(data, 0, sizeof(data));
-  uint8_t i;
-
-  error_t err = iohub_send_command(handle, IOHUB_CMD_ADC, (char*)&data, sizeof(data));
-
-  if(err) {
-    fprintf(stderr, "read ADC failed\n");
-    return;
-  }
-  fprintf(stdout, "ADC:");
-  for(i = 0; i < sizeof (data)/sizeof(uint16_t); i++) {
-     fprintf (stdout, " 0x%02x%02x", (uint8_t)(data[i]>>8), (uint8_t)data[i]);
-  }
-  fprintf(stdout, "\n");
-}
-
 error_t mug_disp_raw(handle_t handle, char* imgData) 
 {
   int row, col;
@@ -53,9 +34,6 @@ error_t mug_disp_raw(handle_t handle, char* imgData)
     // go to the next row
     p += MAX_COMPRESSED_COLS;  
   }
-
-  // check status
-  it8350_read_adc(handle);
 
   return err;
 }

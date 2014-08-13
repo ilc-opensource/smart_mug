@@ -18,7 +18,7 @@ LD_FLAGS=-luv -lpthread -lrt
 
 OBJS=$(addprefix $(BUILD_PATH)/, $(SRCS:.cpp=.o))
 
-all: init $(TARGET) test end
+all: init $(TARGET) end
 
 end:
 	@echo "done"

@@ -5,6 +5,7 @@
 
 void dump_touch(int x, int y, int id)
 {
+  if(id != 0) return;
   printf("%d: [%4d, %4d]\n", id, x, y);
 }
 
@@ -30,6 +31,7 @@ void dump_swipe(gesture_t gesture, char* info)
   } 
 }
 
+/*
 int main(int argc, char** argv)
 {
   handle_t handle = mug_touch_init();
@@ -40,4 +42,15 @@ int main(int argc, char** argv)
 
   // run the loop
   mug_touch_loop(handle);
+}
+*/
+
+int main()
+{
+  // register call backs
+  mug_touch_on(dump_touch);
+  mug_gesture_on(MUG_SWIPE, dump_swipe);
+
+  mug_run_touch_thread();
+  mug_wait_for_touch_thread(); 
 }

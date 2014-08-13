@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <linux/input.h>
+#include <pthread.h>
 
 #include <list>
 #include <map>
@@ -99,10 +100,19 @@ void add_point(touch_point_t *p)
     }
 
     if(run_cb) 
-      touch_cb(p->x, p->y, p->tracking_id);
+      touch_cb(p->x / TOUCH_WIDTH_SCALE, p->y / TOUCH_HEIGHT_SCALE, p->tracking_id);
   }
 
   tracks[p->tracking_id].push_back(*p);
+}
+
+void normalize_point(touch_point_t *point)
+{
+  int oldx = point->x;
+  int oldy = point->y; 
+  
+  point->x = TOUCH_WIDTH - oldy; 
+  point->y = oldx;
 }
 
 void parse_event(input_event *event)
@@ -118,6 +128,7 @@ void parse_event(input_event *event)
   }
 
   if(event->type == EV_SYN && event->code == SYN_MT_REPORT) {
+    normalize_point(&point_save);
     add_point(&point_save);
     init_point(&point_save);
   };
@@ -165,11 +176,17 @@ gesture_t calc_dir(touch_point_t *start, touch_point_t *end)
     absy = 0 - absy;
 
   if(absx > absy) {
+
+    // make sure swip 1/4 distance    
+    if(absx < TOUCH_WIDTH / 4) return rec;
+
     if(x > 0)
       rec = MUG_SWIPE_RIGHT;
     else
       rec = MUG_SWIPE_LEFT;
   } else if(absx < absy){
+
+    if(absy < TOUCH_HEIGHT / 4) return rec;
     if( y > 0)
       rec = MUG_SWIPE_DOWN;
     else
@@ -274,4 +291,38 @@ void mug_touch_loop(handle_t handle)
   while(1) {
     mug_read_touch_data(handle); 
   }
+}
+
+void* thread_entry(void* arg)
+{
+  handle_t handle = (handle_t) arg;
+  mug_touch_loop(handle);
+
+  return NULL;
+}
+
+pthread_t touch_thread_hdl = (pthread_t)NULL;
+
+void mug_run_touch_thread()
+{
+  handle_t handle = mug_touch_init();
+  pthread_t hdl;
+  
+  int err;
+  err = pthread_create(&hdl, NULL, thread_entry, (void*)handle);
+
+  MUG_ASSERT(!err, "can not create touch thread\n");
+
+  touch_thread_hdl = hdl;
+  
+  //return hdl;
+}
+
+void mug_wait_for_touch_thread()
+{
+  void *value_ptr;
+
+  MUG_ASSERT(touch_thread_hdl, "touch thread has not been started\n");
+
+  pthread_join(touch_thread_hdl, &value_ptr);
 }

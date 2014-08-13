@@ -25,10 +25,10 @@ unsigned char RGB_2_raw(unsigned char R, unsigned char G, unsigned B)
   return raw; 
 }
 
-int mug_read_img(char *fname, char *buf)
+int mug_read_cimg(void* cimg, char *buf)
 {
-  CImg<unsigned char> src(fname);
-  
+  CImg<unsigned char> src = *(CImg<unsigned char>*)cimg;
+
   unsigned char *p =(unsigned char*) buf;
   int width = src.width();
   int height = src.height();
@@ -61,17 +61,26 @@ int mug_read_img(char *fname, char *buf)
   return IMG_OK;
 }
 
-char* mug_create_raw_buffer() {
+int mug_read_img(char *fname, char *buf) 
+{
+  CImg<unsigned char> src(fname);
+  return mug_read_cimg(&src, buf);
+}
+
+char* mug_create_raw_buffer() 
+{
   char *ret;
   ret = (char*)malloc(COMPRESSED_SIZE);
   return ret;
 }
 
-void mug_free_raw_buffer(char *buf) {
+void mug_free_raw_buffer(char *buf) 
+{
   free(buf);
 };
 
-int mug_disp_img(handle_t handle, char* name) {
+int mug_disp_img(handle_t handle, char* name) 
+{
   int ret;
   char *buf;
 
@@ -87,6 +96,26 @@ int mug_disp_img(handle_t handle, char* name) {
 
   mug_free_raw_buffer(buf);
  
+  return IMG_OK;
+}
+
+int mug_disp_cimg(handle_t handle, void *cimg) 
+{
+  int ret;
+  char *buf;
+
+  buf = mug_create_raw_buffer();
+  if(!buf)
+    return IMG_ERROR;
+
+  ret = mug_read_cimg(cimg, buf);
+  if(ret != IMG_OK)
+    return ret;
+
+  mug_disp_raw(handle, buf);
+
+  mug_free_raw_buffer(buf);
+
   return IMG_OK;
 }
 

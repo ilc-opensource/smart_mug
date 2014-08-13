@@ -11,6 +11,12 @@
 #define MAX_COMPRESSED_COLS (MAX_COLS/2)
 #define COMPRESSED_SIZE (MAX_COMPRESSED_ROWS * MAX_COMPRESSED_COLS)
 
+#define TOUCH_WIDTH   800
+#define TOUCH_HEIGHT  600
+#define SCREEN_WIDTH  16
+#define SCREEN_HEIGHT 12
+#define TOUCH_WIDTH_SCALE  (TOUCH_WIDTH/SCREEN_WIDTH)
+#define TOUCH_HEIGHT_SCALE (TOUCH_HEIGHT/SCREEN_HEIGHT)
 #define MUG_ASSERT(cond, info, ...) \
   if(!(cond)) {  \
     printf("%s:%d, %s\n", __FILE__, __LINE__, info); \
@@ -114,10 +120,13 @@ void  mug_free_raw_buffer(char *buf);
 
 // image
 int   mug_read_img(char *fname, char *buf);
-int   mug_disp_img(handle_t handle, char* name); 
-
+int   mug_disp_img(handle_t handle, char *name); 
 char* mug_read_img_N(char* names, int *num);
 int   mug_disp_img_N(handle_t handle, char *names, int interval);
+
+// cimg
+int   mug_read_cimg(void *cimg, char *buf);
+int   mug_disp_cimg(handle_t handle, void *cimg); 
 
 // motion sensor
 typedef struct _MPU6050 motion_data_t;
@@ -132,11 +141,12 @@ handle_t mug_temp_init();
 void     mug_read_temp(handle_t handle, temp_data_t *data);
 
 // touch panel
-handle_t mug_touch_init();
-void     mug_touch_on(touch_cb_t cb);
-void     mug_gesture_on(gesture_t g, gesture_cb_t cb);
-void     mug_touch_loop(handle_t handle);
-
+handle_t  mug_touch_init();
+void      mug_touch_on(touch_cb_t cb);
+void      mug_gesture_on(gesture_t g, gesture_cb_t cb);
+void      mug_touch_loop(handle_t handle);
+void      mug_run_touch_thread();
+void      mug_wait_for_touch_thread();
 #ifdef __cplusplus
 }
 #endif

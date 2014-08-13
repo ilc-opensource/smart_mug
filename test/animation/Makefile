@@ -12,7 +12,7 @@ SRCS=animation.cpp
 ###############################################
 
 C_FLAGS=-O0 -g -I$(INC_PATH) -Iinclude
-LD_FLAGS=-L../../lib/libuv/out/Debug -L../../lib/libuv/out/Release -luv -lpthread -lrt
+LD_FLAGS=-L../../lib/libuv/out/Debug -L../../lib/libuv/out/Release -lpthread -lrt
 OBJS=$(addprefix $(BUILD_PATH)/, $(SRCS:.cpp=.o))
 
 all: init $(TARGET) end
@@ -25,7 +25,7 @@ init:
 	@mkdir -p build
 
 $(TARGET):$(OBJS)
-	$(CXX) $^ -o $@ $(LIB_PATH)/libmug.a $(LD_FLAGS)
+	$(CXX) $^ $(LIB_PATH)/libmug.a -o $@ $(LD_FLAGS)
 
 $(BUILD_PATH)/%.o: $(SRC_PATH)/%.cpp
 	$(CXX) $(C_FLAGS) -c $< -o $@

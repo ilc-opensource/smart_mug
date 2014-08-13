@@ -12,7 +12,7 @@ SRCS=show_image.cpp
 ###############################################
 
 C_FLAGS=-O0 -g -I$(INC_PATH) -Iinclude
-LD_FLAGS=-L../../lib/libuv/out/Debug -L../../lib/libuv/out/Release -luv -lpthread -lrt
+LD_FLAGS=-L../../lib/libuv/out/Debug -L../../lib/libuv/out/Release -lpthread -lrt
 OBJS=$(addprefix $(BUILD_PATH)/, $(SRCS:.cpp=.o))
 
 all: init $(TARGET) end

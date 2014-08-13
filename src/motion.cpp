@@ -5,12 +5,9 @@
 #include <stdlib.h>
 #include <iohub_client.h>
 #include <mug.h>
-#include <uv.h>
 
-handle_t mug_motion_sensor_init()
-{
-  return mug_init(DEVICE_MPU);
-}
+#ifdef USE_LIBUV
+#include <uv.h>
 
 uv_loop_t *loop = NULL;
 typedef struct _req_motion_t {
@@ -56,6 +53,12 @@ void mug_read_motion_sensor_async(handle_t handle, motion_cb_t cb)
   req.data = (void*)reqm;
   uv_queue_work(loop, &req, run_req_motion, after_req_motion);
   uv_run(loop, UV_RUN_DEFAULT);
+}
+#endif
+
+handle_t mug_motion_sensor_init()
+{
+  return mug_init(DEVICE_MPU);
 }
 
 error_t mug_read_motion_sensor(handle_t handle, motion_data_t *data)

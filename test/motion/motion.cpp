@@ -29,7 +29,7 @@ int main(int argc, char** argv)
   
   while(1) {
     mug_read_motion_sensor(handle, &data);
-    mug_read_motion_sensor_async(handle, dump);
+    //mug_read_motion_sensor_async(handle, dump);
     printf("      ax:%8d, ay:%8d, az:%8d, gx:%8d, gy:%8d, gz:%8d\n",
            data.ax, data.ay, data.az, data.gx, data.gy, data.gz);
     usleep(500*1000);
