@@ -11,7 +11,7 @@ SRC_PATH=src
 BUILD_PATH=build
 TARGET=$(BIN_PATH)/libmug.a
 
-SRCS=disp.cpp image.cpp mug.cpp motion.cpp touch.cpp temprature.cpp
+SRCS=disp.cpp image.cpp mug.cpp motion.cpp touch.cpp temprature.cpp res_manager.cpp
 
 C_FLAGS=-O0 -g -I$(INC_PATH) -Iinclude -Ilib/CImg -Ilib/libuv/include
 LD_FLAGS=-luv -lpthread -lrt

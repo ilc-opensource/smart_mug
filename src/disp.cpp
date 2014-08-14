@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <iohub_client.h>
 #include <mug.h>
+#include <res_manager.h>
 
 struct __attribute__((packed)) led_line_data {
   uint8_t row;
@@ -40,19 +41,23 @@ error_t mug_disp_raw(handle_t handle, char* imgData)
 
 error_t mug_disp_raw_N(handle_t handle, char* imgData, int number, int interval)
 {
+  int semResource = resource_init(RESOURCE_DISPLAY_TOUCH);
   char *p = imgData;
   error_t error = ERROR_NONE;
   int i;
+  resource_wait(semResource);
   for(i = 0; i < number; i++) {
     error = mug_disp_raw(handle, p);
 
     if(error != ERROR_NONE) {
       printf("error!");
+      resource_post(semResource);
       return error;
     }
     p += COMPRESSED_SIZE;
     usleep(interval * 1000);
   }
+  resource_post(semResource);
 
   return error;
 }
