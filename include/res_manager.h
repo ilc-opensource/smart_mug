@@ -9,7 +9,6 @@
 #include <sys/mman.h>
 #include <iostream>
 #include <cstring>
-#include <errno.h>
 
 #define RESOURCE_DISPLAY_TOUCH "/tmp/smart_mug_display_16x12"
 

@@ -1,4 +1,5 @@
 #include <time.h>
+#include <errno.h>
 #include <res_manager.h>
 extern int isFrontEndApp();
 using namespace std;
