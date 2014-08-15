@@ -1,13 +1,15 @@
 #include <time.h>
 #include <errno.h>
 #include <res_manager.h>
-extern int isFrontEndApp();
 using namespace std;
 
+extern int isFrontEndApp();
+
 int resFd = -1;
-int resource_init(char* name) {
+int resource_init(const char* name) {
   if (resFd == -1) {
-    int resFd = open(name, O_RDWR | O_CREAT, 0666);
+    cout<<getpid()<<" open file "<<name<<endl;
+    resFd = open(name, O_RDWR | O_CREAT, 0666);
     if (resFd == -1) {
       cout<<strerror(errno)<<endl;
     }
@@ -18,23 +20,19 @@ int resource_init(char* name) {
 
 int resource_wait(int fd) {
   while(true) {
-    lockf(fd, F_LOCK, 4);
-    //sem_wait(sem);
-    // Check if there is a process with higher priority also wait for this resource
+    lockf(fd, F_LOCK, 0);
     // Check if current process is the front end app
     if (isFrontEndApp()) {
       // Go through
       break;
     } else {
-      lockf(fd, F_ULOCK, 4);
-      //sem_post(sem);
+      lockf(fd, F_ULOCK, 0);
     }
   }
 }
 
 int resource_post(int fd) {
-  return lockf(fd, F_ULOCK, 4);
-  //return sem_post(sem);
+  return lockf(fd, F_ULOCK, 0);
 }
 
 time_t timer;
@@ -43,8 +41,10 @@ int lockFd = -1;
 int isFrontEndApp() {
   int fd;
   int retv;
-  
+  lockFd = resFd;
+
   if (lockFd == -1) {
+    cout<<getpid()<<" open file "<<RESOURCE_SYS_FRONT_END_APP<<endl;
     lockFd = open(RESOURCE_SYS_FRONT_END_APP, O_RDWR | O_CREAT, 0666);
     if (lockFd == -1) {
       cout<<strerror(errno)<<endl;
@@ -71,16 +71,16 @@ int isFrontEndApp() {
     close(fd);
   }
 
-  lockf(lockFd, F_LOCK, 4);
+//  lockf(lockFd, F_LOCK, 0);
   if (*shareMemPtr == 0 || *shareMemPtr == getpid()) {
     retv = true;
   } else {
-    if (difftime(timer, time(NULL)) > 10) {
+    if (difftime(time(NULL), timer) > 10) {
       timer = time(NULL);
       cout<<"C program, wait for display, frontEndApp="<<*shareMemPtr<<", currentApp="<<getpid()<<endl;
     }
     retv = false;
   }
-  lockf(lockFd, F_ULOCK, 4);
+//  lockf(lockFd, F_ULOCK, 0);
   return retv;
 }

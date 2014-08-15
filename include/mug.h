@@ -5,6 +5,8 @@
 #include <stdio.h>
 #include <assert.h>
 
+//#define USE_IOHUB
+
 #define MAX_ROWS 12
 #define MAX_COLS 16
 #define MAX_COMPRESSED_ROWS MAX_ROWS

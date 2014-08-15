@@ -10,6 +10,9 @@
 #include <iohub_client.h>
 #include <mug.h>
 
+#ifndef USE_IOHUB
+#include <io.h>
+#endif
 using namespace std;
 
 #define MT_INVALID_VALUE -1
@@ -245,8 +248,8 @@ void parse_all_gesture()
 
 handle_t mug_touch_init() 
 {
-  handle_t handle = iohub_open_session(DEVICE_TP);
 
+  handle_t handle = mug_init(DEVICE_TP);
   MUG_ASSERT(handle, "can not init touch\n");
 
   return handle;
@@ -267,10 +270,17 @@ void mug_read_touch_data(handle_t handle)
   struct input_event events[TOUCH_READ_NUM];
   static bool is_reading = false;
 
+#ifdef USE_IOHUB
   error_t err = iohub_send_command(handle, 
                                    IOHUB_CMD_TOUCH_PANEL, 
                                    (char*)events,
                                    sizeof(events));
+#else
+  error_t err = dev_send_command(handle, 
+                                 IOHUB_CMD_TOUCH_PANEL, 
+                                 (char*)events,
+                                 sizeof(events));
+#endif
   if(err) {
     if(is_reading) {
       parse_all_gesture();

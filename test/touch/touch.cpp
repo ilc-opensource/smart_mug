@@ -5,7 +5,7 @@
 
 void dump_touch(int x, int y, int id)
 {
-  if(id != 0) return;
+  //if(id != 0) return;
   printf("%d: [%4d, %4d]\n", id, x, y);
 }
 
