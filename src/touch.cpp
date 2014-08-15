@@ -336,3 +336,10 @@ void mug_wait_for_touch_thread()
 
   pthread_join(touch_thread_hdl, &value_ptr);
 }
+
+void mug_stop_touch_thread()
+{
+  int err = pthread_cancel(touch_thread_hdl);
+
+  MUG_ASSERT(!err, "can not cancel touch thread");
+}

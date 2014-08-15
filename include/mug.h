@@ -129,6 +129,9 @@ int   mug_disp_img_N(handle_t handle, char *names, int interval);
 // cimg
 int   mug_read_cimg(void *cimg, char *buf);
 int   mug_disp_cimg(handle_t handle, void *cimg); 
+void  mug_draw_number_cimg(void *img, int col, int row, char *str, unsigned char* color);
+void  mug_number_text_shape(int *width, int *height);
+
 
 // motion sensor
 typedef struct _MPU6050 motion_data_t;
@@ -148,6 +151,7 @@ void      mug_touch_on(touch_cb_t cb);
 void      mug_gesture_on(gesture_t g, gesture_cb_t cb);
 void      mug_touch_loop(handle_t handle);
 void      mug_run_touch_thread();
+void      mug_stop_touch_thread();
 void      mug_wait_for_touch_thread();
 #ifdef __cplusplus
 }
