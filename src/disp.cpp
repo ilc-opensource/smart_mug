@@ -29,8 +29,11 @@ error_t mug_disp_raw(handle_t handle, char* imgData)
 
     // send to iohub
     err = iohub_send_command(handle, IOHUB_CMD_FB, (char*)&data, sizeof(data));  
-    if(err != ERROR_NONE)
-      return err; 
+    if(err != ERROR_NONE) {
+      printf("C program, disp row error!\n");
+      fflush(NULL);
+      return err;
+    }
 
     // go to the next row
     p += MAX_COMPRESSED_COLS;  
@@ -50,7 +53,8 @@ error_t mug_disp_raw_N(handle_t handle, char* imgData, int number, int interval)
     error = mug_disp_raw(handle, p);
 
     if(error != ERROR_NONE) {
-      printf("error!");
+      printf("C program, disp page error!\n");
+      fflush(NULL);
       resource_post(semResource);
       return error;
     }
