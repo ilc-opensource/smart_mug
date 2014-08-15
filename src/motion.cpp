@@ -6,6 +6,10 @@
 #include <iohub_client.h>
 #include <mug.h>
 
+#ifndef USE_IOHUB
+#include <io.h>
+#endif
+
 #ifdef USE_LIBUV
 #include <uv.h>
 
@@ -63,10 +67,17 @@ handle_t mug_motion_sensor_init()
 
 error_t mug_read_motion_sensor(handle_t handle, motion_data_t *data)
 {
+#ifdef USE_IOHUB
   error_t err = iohub_send_command(handle, 
                                    IOHUB_CMD_MOTION_SENSOR, 
                                    (char*)data, 
                                    sizeof(motion_data_t));
+#else
+  error_t err = dev_send_command(handle,
+                                 IOHUB_CMD_MOTION_SENSOR,
+                                 (char*)data,
+                                 sizeof(motion_data_t));
+#endif
   return err;
 }
 

@@ -5,6 +5,10 @@
 #include <mug.h>
 #include <res_manager.h>
 
+#ifndef USE_IOHUB
+#include <io.h>
+#endif
+
 struct __attribute__((packed)) led_line_data {
   uint8_t row;
   uint8_t reserved[2];
@@ -28,11 +32,15 @@ error_t mug_disp_raw(handle_t handle, char* imgData)
     memcpy(&(data.content), p, MAX_COMPRESSED_COLS);
 
     // send to iohub
-    err = iohub_send_command(handle, IOHUB_CMD_FB, (char*)&data, sizeof(data));  
+#ifdef USE_IOHUB
+    err = iohub_send_command(handle, IOHUB_CMD_FB, (char*)&data, sizeof(data));
+#else
+    err = dev_send_command(handle, IOHUB_CMD_FB, (char*)&data, sizeof(data));
+#endif
+ 
     if(err != ERROR_NONE) {
-      printf("C program, disp row error!\n");
-      fflush(NULL);
-      return err;
+      MUG_ASSERT(0, "iohub_send_command error: %d\n", err);
+      return err; 
     }
 
     // go to the next row
@@ -68,13 +76,21 @@ error_t mug_disp_raw_N(handle_t handle, char* imgData, int number, int interval)
 
 handle_t mug_init(device_t type) 
 {
+#ifdef USE_IOHUB
   handle_t handle = iohub_open_session(type);
+#else
+  handle_t handle = dev_open(type);
+#endif
   return handle;
 }
 
 void mug_close(handle_t handle)
 {
+#ifdef USE_IOHUB
   iohub_close_session(handle);
+#else
+  dev_close(handle);
+#endif
 }
 
 handle_t mug_disp_init()

@@ -6,7 +6,7 @@ using namespace std;
 extern int isFrontEndApp();
 
 int resFd = -1;
-int resource_init(char* name) {
+int resource_init(const char* name) {
   if (resFd == -1) {
     cout<<getpid()<<" open file "<<name<<endl;
     resFd = open(name, O_RDWR | O_CREAT, 0666);

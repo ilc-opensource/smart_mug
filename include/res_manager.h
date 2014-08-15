@@ -15,7 +15,7 @@
 #define SHM_NAME "/memmap"  
 #define RESOURCE_SYS_FRONT_END_APP "/tmp/smart_mug_front_end_app"   
 
-extern int resource_init(char* name);
+extern int resource_init(const char* name);
 extern int resource_wait(int fd);
 extern int resource_post(int fd);
 
