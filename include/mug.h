@@ -98,8 +98,8 @@ typedef enum {
 
 }gesture_t;
 
-typedef void (*gesture_cb_t)(gesture_t, char* info);
-typedef void (*touch_cb_t)(int x, int y, int id);
+typedef void (*gesture_cb_t)(gesture_t, char*);
+typedef void (*touch_cb_t)(int, int, int);
 
 #ifdef __cplusplus
 extern "C" { 
