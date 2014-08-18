@@ -19,6 +19,13 @@ using namespace std;
 
 #define TOUCH_READ_NUM 2
 
+#define TRACE_MIN_NUM 10
+
+#define HOLD_MIN_NUM  20
+
+#define HOLD_MIN_PIXEL 2
+
+#define IS_TWO_FINGER(tk) (tk->find(0) != tk->end() && tk->find(1) != tk->end())
 //#define DEBUG
 
 typedef list<input_event>     event_list_t;
@@ -162,8 +169,23 @@ void parse_event(input_event *event)
   }
 }
 
-gesture_t calc_dir(touch_point_t *start, touch_point_t *end)
+bool validate_trace(touch_trace_t *tr)
 {
+  if(tr->size() < TRACE_MIN_NUM)
+    return false;
+
+  return true;
+}
+
+gesture_t calc_dir(touch_trace_t *tr)
+{
+  if(!validate_trace(tr))
+    return MUG_NO_GESTURE;
+
+  touch_point_t *start, *end;
+  start = &(tr->front());
+  end = &(tr->back());
+  
   int x = end->x - start->x;
   int y = end->y - start->y;
 
@@ -200,45 +222,100 @@ gesture_t calc_dir(touch_point_t *start, touch_point_t *end)
   return rec;
 }
 
-bool parse_swipe(gesture_t g, gesture_cb_t cb, touch_trace_t *tr)
+bool is_hold(touch_trace_t *tr)
 {
-  touch_point_t start, end;
-  start = tr->front();
-  end = tr->back();
+  touch_point_t *start, *end;
+  start = &(tr->front());
+  end = &(tr->back());
 
-  gesture_t rec = calc_dir(&start, &end);
+  start->x /= TOUCH_WIDTH_SCALE;
+  start->y /= TOUCH_HEIGHT_SCALE;
 
-  if(rec == MUG_NO_GESTURE)
-    return false;
+  end->x /= TOUCH_WIDTH_SCALE;
+  end->y /= TOUCH_HEIGHT_SCALE;
 
-  if(MUG_SWIPE <= rec && rec <= MUG_SWIPE_DOWN) {
-    if(g == MUG_SWIPE || g == rec) {
-      cb(rec, NULL);      
+  int xdiff = end->x - start->x;
+  int ydiff = end->y - start->y;
+
+  return(validate_trace(tr) 
+         && tr->size() >= HOLD_MIN_NUM
+         && (-HOLD_MIN_PIXEL < xdiff && xdiff < HOLD_MIN_PIXEL )
+         && (-HOLD_MIN_PIXEL < ydiff && ydiff < HOLD_MIN_PIXEL ));
+
+}
+
+bool parse_hold(gesture_t g, gesture_cb_t cb, touch_track_t *tk)
+{
+  bool is_two_finger = IS_TWO_FINGER(tk);
+  if(!is_two_finger
+     && (g == MUG_GESTURE || g == MUG_HOLD)
+     && tk->find(0) != tk->end()
+     && is_hold(&(tk->at(0)))) {
+
+    cb(MUG_HOLD, NULL);
+    return true;
+  }
+
+  if(is_two_finger
+     && (g == MUG_GESTURE || g == MUG_HOLD_2)
+	 && tk->find(0) != tk->end()
+     && is_hold(&(tk->at(0)))
+     && tk->find(1) != tk->end()
+     && is_hold(&(tk->at(1)))) {
+
+    cb(MUG_HOLD_2, NULL);
+    return true;
+  }
+  
+  return false;
+}
+
+bool parse_swipe(gesture_t g, gesture_cb_t cb, touch_track_t *tk)
+{
+
+  bool is_two_finger = IS_TWO_FINGER(tk);
+
+  if(is_two_finger 
+     && (g == MUG_GESTURE || MUG_SWIPE_2 <= g && g <= MUG_SWIPE_DOWN_2)) {
+    gesture_t rec0 = calc_dir(&(tk->at(0)));
+    gesture_t rec1 = calc_dir(&(tk->at(0)));
+    
+    if(rec0 != MUG_NO_GESTURE && rec0 == rec1) {
+      gesture_t rec = (gesture_t)(MUG_SWIPE_2 + (rec0 - MUG_SWIPE));
+      if(g == MUG_GESTURE || g == MUG_SWIPE_2 || g == rec) {
+        cb(rec, NULL);  
+        is_two_finger = true;    
+      }
     }
-  } else {
-    return false;
-  } 
+  }
 
+  if(!is_two_finger 
+     && (g == MUG_GESTURE || MUG_SWIPE <= g && g <= MUG_SWIPE_DOWN)
+     && !is_two_finger) {
+    gesture_t rec = calc_dir(&(tk->at(0)));
+
+    if(rec != MUG_NO_GESTURE) {
+      if(g == MUG_GESTURE || g == MUG_SWIPE || g == rec) {
+        cb(rec, NULL);      
+      }
+    }
+  }
+ 
   return true;
 }
 
-void parse_gesture(gesture_t g, gesture_cb_t cb, touch_track_t *tr) 
+void parse_gesture(gesture_t g, gesture_cb_t cb, touch_track_t *tk) 
 {
-  switch(g) {
-  case MUG_SWIPE:
-  case MUG_SWIPE_LEFT:
-  case MUG_SWIPE_RIGHT:
-  case MUG_SWIPE_UP:
-  case MUG_SWIPE_DOWN:
-    if(tr->find(0) != tr->end())
-      parse_swipe(g, cb, &(tr->at(0))); 
-    break;
-  }
+  if(g == MUG_GESTURE || MUG_SWIPE <= g && g <= MUG_SWIPE_DOWN_2)
+    parse_swipe(g, cb, tk);
+
+  if(g == MUG_GESTURE || MUG_HOLD <= g && g <= MUG_HOLD_2)
+    parse_hold(g, cb, tk);
+
 }
 
 void parse_all_gesture()
 {
-  
   for(gesture_to_cb_t::iterator itr = gesture_to_cb.begin();
       itr != gesture_to_cb.end();
       itr++) {

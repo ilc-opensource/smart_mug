@@ -9,7 +9,7 @@ void dump_touch(int x, int y, int id)
   printf("%d: [%4d, %4d]\n", id, x, y);
 }
 
-void dump_swipe(gesture_t gesture, char* info)
+void dump_gesture(gesture_t gesture, char* info)
 {
   switch(gesture) {
 
@@ -28,28 +28,39 @@ void dump_swipe(gesture_t gesture, char* info)
   case MUG_SWIPE_DOWN:
     printf("down\n");
     break;
+
+  case MUG_SWIPE_LEFT_2:
+    printf("left_2\n");
+    break;
+
+  case MUG_SWIPE_RIGHT_2:
+    printf("right_2\n");
+    break;
+
+  case MUG_SWIPE_UP_2:
+    printf("up_2\n");
+    break;
+
+  case MUG_SWIPE_DOWN_2:
+    printf("down_2\n");
+    break;
+
+  case MUG_HOLD:
+    printf("hold\n");
+    break;
+
+  case MUG_HOLD_2:
+    printf("hold_2\n");
+    break;
+
   } 
 }
-
-/*
-int main(int argc, char** argv)
-{
-  handle_t handle = mug_touch_init();
-
-  // register call backs
-  mug_touch_on(dump_touch);
-  mug_gesture_on(MUG_SWIPE, dump_swipe);
-
-  // run the loop
-  mug_touch_loop(handle);
-}
-*/
 
 int main()
 {
   // register call backs
   mug_touch_on(dump_touch);
-  mug_gesture_on(MUG_SWIPE, dump_swipe);
+  mug_gesture_on(MUG_GESTURE, dump_gesture);
 
   mug_run_touch_thread();
   mug_wait_for_touch_thread(); 

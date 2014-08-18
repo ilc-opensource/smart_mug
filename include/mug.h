@@ -74,30 +74,25 @@ typedef struct _touch_point_t
 
 typedef enum {
   MUG_NO_GESTURE = 0,
+  
+  MUG_GESTURE,
 
   MUG_SWIPE,
   MUG_SWIPE_LEFT,
   MUG_SWIPE_RIGHT,
   MUG_SWIPE_UP,
   MUG_SWIPE_DOWN,
-
-  MUG_TOUCH,
-  MUG_TOUCH_DOWN,
-  MUG_TOUCH_UP,
-  MUG_HODE,
-
+	  
   MUG_SWIPE_2,
   MUG_SWIPE_LEFT_2,
   MUG_SWIPE_RIGHT_2,
   MUG_SWIPE_UP_2,
   MUG_SWIPE_DOWN_2,
-  MUG_TOUCH_2,
-  MUG_TOUCH_DOWN_2,
-  MUG_TOUCH_UP_2,
-  MUG_HODE_2,
+
+  MUG_HOLD,
+  MUG_HOLD_2,
 
   MUG_GESTURE_NUM
-
 }gesture_t;
 
 typedef void (*gesture_cb_t)(gesture_t, char*);
