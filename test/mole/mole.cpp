@@ -122,25 +122,6 @@ void draw_mole(mole_t *mole, CImg<unsigned char> *pic)
 {
   canvas.draw_image(mole->col, mole->row, 0, 0,
                     *pic);
-                    
-  //printf("(%d, %d), %d x %d\n", mole->col, mole->row, mole->width, mole->height);
-  /*
-  canvas.draw_rectangle(mole->col, 
-                        mole->row, 
-                        0,
-                        mole->col + mole->width,
-                        mole->row + mole->height,
-                        0,
-                        yellow);
-
-  canvas.draw_rectangle(mole->col+1, 
-                        mole->row + 1, 
-                        0, 
-                        mole->col + mole->width - 1,
-                        mole->row + mole->height - 1,
-                        0, 
-                        c); 
-  */
 }
 
 void draw_all(CImg<unsigned char> *pic)
@@ -173,18 +154,6 @@ void disp_canvas()
 #else
 void disp_canvas()
 {
-  static int i = 0;
-  save_canvas(i);
-  canvas.draw_rectangle(0,
-                        0,
-                        0,
-                        i % SCR_WIDTH,
-                        i / SCR_WIDTH,
-                        0,
-                        yellow);
-
-  i++;
-  printf("disp %d\n", i);
   mug_disp_cimg(handle, &canvas); 
 }
 #endif
@@ -248,6 +217,20 @@ void next_round(int num)
 void show_result()
 {
   printf("%d / %d\n", score.touched, score.all);
+
+  clear_canvas();
+
+  int width, height;
+  mug_number_text_shape(&width, &height);
+
+  char temp[4];
+  sprintf(temp, "%02d", score.touched);
+  mug_draw_number_cimg(&canvas, 0, 0, temp, red);
+
+  sprintf(temp, "%02d", score.all);
+  mug_draw_number_cimg(&canvas, width * 2 , 0, temp, green);
+
+  disp_canvas();
 }
 
 void touch_on(int x, int y, int id)
@@ -286,23 +269,21 @@ void init()
 
 }
 
+void finish()
+{
+  mug_stop_touch_thread();
+  pthread_mutex_destroy(&mutex);
+}
+
 int main(int argc, char **argv)
 {
-/*
-  init();
-  for(int i = 1; i < 20; i++) {
-    printf("%d\n", i);
-    canvas.draw_text(0, 0, "20:13", red, bg, 1, i);
-    disp_canvas();
-    usleep(600 * 1000);
-  }
-*/
-
   init();
  
   for(int i = 0; i < round_num; i++) {
     next_round(2);
     usleep(1000*1000);
   }
+
+  finish();
   show_result();
 }

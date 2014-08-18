@@ -1,6 +1,7 @@
 #include <mug.h>
 
 #include <list>
+#include <vector>
 using namespace std;
 
 #define cimg_display 0
@@ -170,3 +171,77 @@ int mug_disp_img_N(handle_t handle, char *names, int interval)
   mug_disp_raw_N(handle, raw, num, interval); 
 }
 
+#define NUMBER_PIC_DIR "number_pic"
+vector< CImg<unsigned char> > numbers;
+
+void init_number_text()
+{
+  char temp[256];
+  for(int i = 0; i < 10; i++) {
+    sprintf(temp, "%s/%d.bmp", NUMBER_PIC_DIR, i);
+    numbers.push_back(CImg<unsigned char>(temp));
+  }
+}
+
+void change_color(CImg<unsigned char> &img, unsigned char *color)
+{
+  for(int r = 0; r < img.height(); r++) {
+    for(int c = 0; c < img.width(); c++) {
+      if(img(c, r, 0, 0) == img(c, r, 0, 1)
+         && img(c, r, 0, 0) == img(c, r, 0, 2)
+         && img(c, r, 0, 0) > 0) {
+        img(c, r, 0, 0) = color[0];
+        img(c, r, 0, 1) = color[1];
+        img(c, r, 0, 2) = color[2];
+      }
+   }
+  }
+}
+
+void draw_number(CImg<unsigned char> *pimg, int c, int r, char *str, unsigned char *color)
+{
+  char *p = str;
+  int next_c = c;
+
+  CImg<unsigned char> img;
+
+  while('0' <= *p && *p <= '9') {
+    img = numbers[*p - '0'];
+    change_color(img, color);
+    pimg->draw_image(next_c, r, 0, 0,
+                      img);
+    next_c += img.width();
+    next_c++;
+    p++;
+  }
+}
+
+void resize(CImg<unsigned char> &img, int new_col, int new_row)
+{
+  img.resize(new_col, new_row, -100);
+
+  printf("img -> %d x %d\n", img.width(), img.height());
+
+}
+
+void mug_draw_number_cimg(void *img, int col, int row, char *str, unsigned char* color)
+{
+  if(numbers.empty()) {
+    init_number_text();
+  }
+
+  draw_number((CImg<unsigned char> *)img, col, row, str, color);
+}
+
+void mug_number_text_shape(int *width, int *height)
+{
+  if(numbers.empty()) {
+    init_number_text();
+  }
+
+  CImg<unsigned char> img;
+  img = numbers[0];
+
+  *width = img.width() + 1;
+  *height = img.height();
+}
