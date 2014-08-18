@@ -27,6 +27,7 @@ int resource_wait(int fd) {
       break;
     } else {
       lockf(fd, F_ULOCK, 0);
+      usleep(10000);
     }
   }
 }
@@ -41,11 +42,11 @@ int lockFd = -1;
 int isFrontEndApp() {
   int fd;
   int retv;
-  lockFd = resFd;
+//  lockFd = resFd;
 
   if (lockFd == -1) {
-    cout<<getpid()<<" open file "<<RESOURCE_SYS_FRONT_END_APP<<endl;
-    lockFd = open(RESOURCE_SYS_FRONT_END_APP, O_RDWR | O_CREAT, 0666);
+    cout<<getpid()<<" open file "<<LOCK_SYS_FRONT_END_APP<<endl;
+    lockFd = open(LOCK_SYS_FRONT_END_APP, O_RDWR | O_CREAT, 0666);
     if (lockFd == -1) {
       cout<<strerror(errno)<<endl;
       return false;
@@ -71,7 +72,7 @@ int isFrontEndApp() {
     close(fd);
   }
 
-//  lockf(lockFd, F_LOCK, 0);
+  lockf(lockFd, F_LOCK, 0);
   if (*shareMemPtr == 0 || *shareMemPtr == getpid()) {
     retv = true;
   } else {
@@ -81,6 +82,6 @@ int isFrontEndApp() {
     }
     retv = false;
   }
-//  lockf(lockFd, F_ULOCK, 0);
+  lockf(lockFd, F_ULOCK, 0);
   return retv;
 }
