@@ -52,7 +52,7 @@ error_t mug_disp_raw(handle_t handle, char* imgData)
 
 error_t mug_disp_raw_N(handle_t handle, char* imgData, int number, int interval)
 {
-  int semResource = resource_init(RESOURCE_DISPLAY_TOUCH);
+  int semResource = resource_init(LOCK_DISPLAY_TOUCH);
   char *p = imgData;
   error_t error = ERROR_NONE;
   int i;
