@@ -35,3 +35,25 @@ void mug_read_temp(handle_t handle, temp_data_t *temp)
   temp->mug_temp     = voltage_to_temp(voltage[1]);
   temp->battery_temp = voltage_to_temp(voltage[2]);
 }
+
+int mug_read_board_temp(handle_t handle)
+{
+  temp_data_t data;
+  mug_read_temp(handle, &data);
+  return data.board_temp;
+}
+
+int mug_read_mug_temp(handle_t handle)
+{
+  temp_data_t data;
+  mug_read_temp(handle, &data);
+  return data.mug_temp;
+}
+
+int mug_read_battery_temp(handle_t handle)
+{
+  temp_data_t data;
+  mug_read_temp(handle, &data);
+  return data.battery_temp;
+}
+

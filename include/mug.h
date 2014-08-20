@@ -139,6 +139,11 @@ void     mug_read_motion_sensor_async(handle_t handle, motion_cb_t cb);
 // temprature
 handle_t mug_temp_init();
 void     mug_read_temp(handle_t handle, temp_data_t *data);
+int      mug_read_board_temp(handle_t handle);
+int 	 mug_read_mug_temp(handle_t handle);
+int 	 mug_read_battery_temp(handle_t handle);
+
+
 
 // touch panel
 handle_t  mug_touch_init();

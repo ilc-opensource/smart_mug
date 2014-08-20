@@ -19,8 +19,13 @@ int main(int argc, char** argv)
   printf("handle: 0%x\n", handle);
   
   while(1) {
+#if 0
     mug_read_temp(handle, &data);
     printf("board: %4d, mug: %4d, battery: %4d\n", data.board_temp, data.mug_temp, data.battery_temp);
+#else
+   int temp = mug_read_board_temp(handle);
+   printf("board temp: %d\n", temp);
+#endif
     usleep(500*1000);
   }
 
