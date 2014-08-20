@@ -13,7 +13,7 @@
 #ifdef USE_LIBUV
 #include <uv.h>
 
-uv_loop_t *loop = NULL;
+static uv_loop_t *motion_loop = NULL;
 typedef struct _req_motion_t {
   motion_data_t data;
   handle_t      handle;
@@ -43,8 +43,8 @@ void after_req_motion(uv_work_t *req, int status)
 void mug_read_motion_sensor_async(handle_t handle, motion_cb_t cb)
 {
   // lazy initialization
-  if(loop == NULL)
-    loop = uv_default_loop();
+  if(motion_loop == NULL)
+    motion_loop = uv_default_loop();
 
   uv_work_t req;
   req_motion_t *reqm;
@@ -55,8 +55,8 @@ void mug_read_motion_sensor_async(handle_t handle, motion_cb_t cb)
   reqm->handle = handle;
 
   req.data = (void*)reqm;
-  uv_queue_work(loop, &req, run_req_motion, after_req_motion);
-  uv_run(loop, UV_RUN_DEFAULT);
+  uv_queue_work(motion_loop, &req, run_req_motion, after_req_motion);
+  uv_run(motion_loop, UV_RUN_DEFAULT);
 }
 #endif
 

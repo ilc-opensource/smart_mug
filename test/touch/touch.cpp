@@ -63,5 +63,5 @@ int main()
   mug_gesture_on(MUG_GESTURE, dump_gesture);
 
   mug_run_touch_thread();
-  mug_wait_for_touch_thread(); 
+  mug_wait_for_touch_thread();
 }

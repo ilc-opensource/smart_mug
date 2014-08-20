@@ -13,7 +13,14 @@ TARGET=$(BIN_PATH)/libmug.a
 
 SRCS=disp.cpp image.cpp mug.cpp motion.cpp touch.cpp temprature.cpp res_manager.cpp io.cpp
 
-C_FLAGS=-O0 -g -I$(INC_PATH) -Iinclude -Ilib/CImg -Ilib/libuv/include
+C_FLAGS=-O0 -g -I$(INC_PATH) -Iinclude -Ilib/CImg -I/home/zliu9/.node-gyp/0.10.28/deps/uv/include
+#C_FLAGS=-O0 -g -I$(INC_PATH) -Iinclude -Ilib/CImg -Ilib/libuv/include
+
+ifeq ($(USE_LIBUV), 1)
+C_FLAGS+= -DUSE_LIBUV
+else
+endif
+
 LD_FLAGS=-luv -lpthread -lrt
 
 OBJS=$(addprefix $(BUILD_PATH)/, $(SRCS:.cpp=.o))

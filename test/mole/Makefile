@@ -12,7 +12,7 @@ SRCS=mole.cpp
 ###############################################
  
 C_FLAGS=-O0 -g -I$(INC_PATH) -Iinclude -I$(MUG_ROOT)/lib/CImg/
-LD_FLAGS=-L../../lib/libuv/out/Debug -L../../lib/libuv/out/Release -lpthread -lrt
+LD_FLAGS=-L../../lib/libuv/out/Debug -L../../lib/libuv/out/Release -lpthread -lrt -luv
 OBJS=$(addprefix $(BUILD_PATH)/, $(SRCS:.cpp=.o))
 
 all: init $(TARGET) end

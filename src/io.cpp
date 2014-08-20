@@ -7,7 +7,7 @@
 #include <fcntl.h>
 #include <sys/select.h>
 #include <fcntl.h>
-
+#include <errno.h>
 #include <io.h>
 #include <mug.h>
 
@@ -52,6 +52,10 @@ int read_with_timeout(handle_t handle, cmd_t cmdtype, char *data, int message_le
   timeout.tv_usec = 100 * 1000;
   
   rv = select(hdl + 1, &set, NULL, NULL, &timeout);
+
+  if(rv < 0) {
+    printf("select err: %d, %s\n", errno, strerror(errno));
+  }
 
   if(rv > 0) {
     read(hdl, data, message_len);
