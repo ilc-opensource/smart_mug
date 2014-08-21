@@ -120,7 +120,7 @@ int mug_disp_cimg(handle_t handle, void *cimg)
   return IMG_OK;
 }
 
-char* mug_read_img_N(char* names, int *num)
+char* mug_read_img_N(char* names, int *num, int *size)
 {
   char *p = (char*)malloc(strlen(names) + 1);
   strcpy(p, names);
@@ -143,7 +143,9 @@ char* mug_read_img_N(char* names, int *num)
   }
 
   (*num) = parsed.size();
-  char *raw = (char*)malloc(COMPRESSED_SIZE * parsed.size());
+  (*size) = COMPRESSED_SIZE * parsed.size();
+
+  char *raw = (char*)malloc(*size);
   p = raw;
   int err;
  
@@ -165,8 +167,8 @@ char* mug_read_img_N(char* names, int *num)
 
 int mug_disp_img_N(handle_t handle, char *names, int interval)
 {
-  int num;
-  char *raw = mug_read_img_N(names, &num);
+  int num, size;
+  char *raw = mug_read_img_N(names, &num, &size);
 
   mug_disp_raw_N(handle, raw, num, interval); 
 }

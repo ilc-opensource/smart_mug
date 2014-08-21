@@ -118,7 +118,7 @@ void  mug_free_raw_buffer(char *buf);
 // image
 int   mug_read_img(char *fname, char *buf);
 int   mug_disp_img(handle_t handle, char *name); 
-char* mug_read_img_N(char* names, int *num);
+char* mug_read_img_N(char* names, int *num, int *size);
 int   mug_disp_img_N(handle_t handle, char *names, int interval);
 
 // cimg
