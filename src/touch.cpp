@@ -314,8 +314,8 @@ void normalize_point(touch_point_t *point)
   int oldx = point->x;
   int oldy = point->y; 
   
-  point->x = TOUCH_WIDTH - oldy; 
-  point->y = oldx;
+  point->x = TOUCH_WIDTH  - oldy; 
+  point->y = TOUCH_HEIGHT - oldx;
 }
 
 void parse_event(input_event *event)
@@ -632,9 +632,14 @@ void mug_wait_for_touch_thread()
   MUG_ASSERT(false, "can not run mug_wait_for_touch_thread\n");
 }
 
+void close_cb(uv_handle_t* handle)
+{
+}
+
 void mug_stop_touch_thread()
 {
-  MUG_ASSERT(false, "can not run mug_stop_touch_thread\n");
+  uv_close((uv_handle_t*)touch_loop, close_cb);
+  //MUG_ASSERT(false, "can not run mug_stop_touch_thread\n");
 }
 
 #else

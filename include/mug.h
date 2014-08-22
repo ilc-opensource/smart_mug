@@ -107,10 +107,19 @@ typedef void (*gesture_cb_t)(gesture_t, char*); //gesture, info
 typedef void (*touch_cb_t)(int, int, int); // x, y, id
 typedef void (*touch_event_cb_t)(touch_event_t, int, int, int); // event, x, y, id
 
+extern unsigned char red[];
+extern unsigned char green[];
+extern unsigned char blue[];
+extern unsigned char yellow[];
+extern unsigned char cyan[];
+extern unsigned char Magenta[];
+extern unsigned char white[];
+extern unsigned char black[];
 
 #ifdef __cplusplus
 extern "C" { 
 #endif
+
 
 // device control
 handle_t mug_init(device_t type);

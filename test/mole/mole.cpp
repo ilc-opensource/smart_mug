@@ -27,17 +27,7 @@ using namespace std;
 #define MOLE_PIC      "mole.bmp"
 #define MOLE_HIT_PIC  "mole_hit.bmp"
 
-unsigned char red[]    = {255, 0, 0};
-unsigned char green[]  = {0, 255, 0};
-unsigned char blue[]   = {0, 0, 255};
-unsigned char bg[]     = {0, 0, 0};
-unsigned char yellow[] = {255, 255, 0};
-
 typedef unsigned char * color_t;
-#define COLOR_IDLE  blue
-#define COLOR_GOOD  green
-#define COLOR_WRONG red
-#define COLOR_BG    bg
 
 CImg<unsigned char> canvas(SCR_WIDTH, SCR_HEIGHT, 1, 3, 0);
 CImg<unsigned char> mole_pic(MOLE_PIC);
@@ -163,7 +153,7 @@ void clear_canvas()
 {
   canvas.draw_rectangle(0, 0, 0,
                         SCR_WIDTH, SCR_HEIGHT, 0,
-                        COLOR_BG);
+                        black);
 
 }
 
@@ -257,6 +247,11 @@ void touch_on(int x, int y, int id)
   UNLOCK_;
 }
 
+void *touch_thread(void *arg)	
+{
+  mug_run_touch_thread();
+}
+
 void init()
 {
   pthread_mutex_init(&mutex, NULL);
@@ -264,7 +259,14 @@ void init()
 #if !cimg_display
   handle = mug_disp_init();
   mug_touch_on(touch_on);
+
+#ifdef USE_LIBUV  
+  pthread_t hdl;
+  pthread_create(&hdl, NULL, touch_thread, NULL);
+#else
   mug_run_touch_thread();
+#endif
+
 #endif
 
 }
@@ -284,6 +286,7 @@ int main(int argc, char **argv)
     usleep(1000*1000);
   }
 
-  finish();
   show_result();
+
+  finish();
 }
