@@ -89,14 +89,24 @@ typedef enum {
   MUG_SWIPE_UP_2,
   MUG_SWIPE_DOWN_2,
 
-  MUG_HOLD,
-  MUG_HOLD_2,
-
   MUG_GESTURE_NUM
 }gesture_t;
 
-typedef void (*gesture_cb_t)(gesture_t, char*);
-typedef void (*touch_cb_t)(int, int, int);
+typedef enum {
+  TOUCH_EVENT_ALL = 0,
+
+  TOUCH_CLICK,
+  TOUCH_DOWN,
+  TOUCH_UP,
+  TOUCH_HOLD,
+
+  TOUCH_EVENT_NUM
+} touch_event_t;
+
+typedef void (*gesture_cb_t)(gesture_t, char*); //gesture, info
+typedef void (*touch_cb_t)(int, int, int); // x, y, id
+typedef void (*touch_event_cb_t)(touch_event_t, int, int, int); // event, x, y, id
+
 
 #ifdef __cplusplus
 extern "C" { 
@@ -149,6 +159,7 @@ int 	 mug_read_battery_temp(handle_t handle);
 handle_t  mug_touch_init();
 void      mug_touch_on(touch_cb_t cb);
 void      mug_gesture_on(gesture_t g, gesture_cb_t cb);
+void      mug_touch_event_on(touch_event_t event, touch_event_cb_t cb);
 void      mug_touch_loop(handle_t handle);
 void      mug_run_touch_thread();
 void      mug_stop_touch_thread();

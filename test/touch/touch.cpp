@@ -9,6 +9,30 @@ void dump_touch(int x, int y, int id)
   printf("%d: [%4d, %4d]\n", id, x, y);
 }
 
+void dump_touch_event(touch_event_t e, int x, int y, int id)
+{
+  printf("event ");
+  
+  switch(e) {
+    case TOUCH_CLICK:
+      printf("click");
+      break;
+   
+    case TOUCH_DOWN:
+      printf("touch down");
+      break;
+
+    case TOUCH_UP:
+      printf("touch up");
+      break;
+
+    case TOUCH_HOLD:
+      printf("hold");
+      break;
+  }
+
+  printf(" @ %d ( %d x %d)\n", id, x, y);
+}
 void dump_gesture(gesture_t gesture, char* info)
 {
   switch(gesture) {
@@ -45,22 +69,16 @@ void dump_gesture(gesture_t gesture, char* info)
     printf("down_2\n");
     break;
 
-  case MUG_HOLD:
-    printf("hold\n");
-    break;
-
-  case MUG_HOLD_2:
-    printf("hold_2\n");
-    break;
-
   } 
 }
 
 int main()
 {
-  // register call backs
   mug_touch_on(dump_touch);
+
   mug_gesture_on(MUG_GESTURE, dump_gesture);
+
+  mug_touch_event_on(TOUCH_EVENT_ALL, dump_touch_event);
 
   mug_run_touch_thread();
   mug_wait_for_touch_thread();
