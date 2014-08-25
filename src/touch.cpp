@@ -614,7 +614,8 @@ void mug_run_touch_thread()
 
   //_mutex_init(&uv_mutex);
 
-  touch_loop = uv_default_loop();
+  //touch_loop = uv_default_loop();
+  touch_loop = uv_loop_new();
   uv_work_t req;
   req.data = (void*)handle;
 

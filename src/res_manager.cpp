@@ -8,7 +8,7 @@ extern int isFrontEndApp();
 int resFd = -1;
 int resource_init(const char* name) {
   if (resFd == -1) {
-    cout<<getpid()<<" open file "<<name<<endl;
+//    cout<<getpid()<<" open file "<<name<<endl;
     resFd = open(name, O_RDWR | O_CREAT, 0666);
     if (resFd == -1) {
       cout<<strerror(errno)<<endl;
@@ -45,7 +45,7 @@ int isFrontEndApp() {
 //  lockFd = resFd;
 
   if (lockFd == -1) {
-    cout<<getpid()<<" open file "<<LOCK_SYS_FRONT_END_APP<<endl;
+    //cout<<getpid()<<" open file "<<LOCK_SYS_FRONT_END_APP<<endl;
     lockFd = open(LOCK_SYS_FRONT_END_APP, O_RDWR | O_CREAT, 0666);
     if (lockFd == -1) {
       cout<<strerror(errno)<<endl;
@@ -78,7 +78,7 @@ int isFrontEndApp() {
   } else {
     if (difftime(time(NULL), timer) > 10) {
       timer = time(NULL);
-      cout<<"C program, wait for display, frontEndApp="<<*shareMemPtr<<", currentApp="<<getpid()<<endl;
+      //cout<<"C program, wait for display, frontEndApp="<<*shareMemPtr<<", currentApp="<<getpid()<<endl;
     }
     retv = false;
   }
