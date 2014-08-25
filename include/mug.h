@@ -107,14 +107,14 @@ typedef void (*gesture_cb_t)(gesture_t, char*); //gesture, info
 typedef void (*touch_cb_t)(int, int, int); // x, y, id
 typedef void (*touch_event_cb_t)(touch_event_t, int, int, int); // event, x, y, id
 
-extern unsigned char red[];
-extern unsigned char green[];
-extern unsigned char blue[];
-extern unsigned char yellow[];
-extern unsigned char cyan[];
-extern unsigned char Magenta[];
-extern unsigned char white[];
-extern unsigned char black[];
+extern unsigned char red[3];
+extern unsigned char green[3];
+extern unsigned char blue[3];
+extern unsigned char yellow[3];
+extern unsigned char cyan[3];
+extern unsigned char Magenta[3];
+extern unsigned char white[3];
+extern unsigned char black[3];
 
 #ifdef __cplusplus
 extern "C" { 
