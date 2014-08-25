@@ -173,6 +173,10 @@ void      mug_touch_loop(handle_t handle);
 void      mug_run_touch_thread();
 void      mug_stop_touch_thread();
 void      mug_wait_for_touch_thread();
+
+// utils
+char*  get_proc_dir();
+
 #ifdef __cplusplus
 }
 #endif

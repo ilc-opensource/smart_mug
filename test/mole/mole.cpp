@@ -5,6 +5,7 @@
 using namespace cimg_library;
 
 #include <list>
+#include <string>
 #include <algorithm>
 using namespace std;
 
@@ -30,8 +31,8 @@ using namespace std;
 typedef unsigned char * color_t;
 
 CImg<unsigned char> canvas(SCR_WIDTH, SCR_HEIGHT, 1, 3, 0);
-CImg<unsigned char> mole_pic(MOLE_PIC);
-CImg<unsigned char> mole_hit_pic(MOLE_HIT_PIC);
+CImg<unsigned char> mole_pic;
+CImg<unsigned char> mole_hit_pic;
 
 class mole_t 
 {
@@ -254,6 +255,11 @@ void *touch_thread(void *arg)
 
 void init()
 {
+
+  string proc_dir(get_proc_dir());
+ 
+  mole_pic.load((proc_dir + "/" +  MOLE_PIC).c_str());
+  mole_hit_pic.load((proc_dir + "/" +  MOLE_HIT_PIC).c_str());
   pthread_mutex_init(&mutex, NULL);
 
 #if !cimg_display
@@ -279,6 +285,10 @@ void finish()
 
 int main(int argc, char **argv)
 {
+  if(argc == 2) {
+    round_num = atoi(argv[1]);
+  }
+
   init();
  
   for(int i = 0; i < round_num; i++) {

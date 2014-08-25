@@ -19,6 +19,23 @@ unsigned char black[]  = {0,   0,   0  };
 
 #define LATCH 128
 
+#define MAX_FILE_NAME 512
+
+char *get_proc_dir() {
+  char *buf = (char*) malloc(sizeof(char) * 512);
+
+  readlink("/proc/self/exe", buf, MAX_FILE_NAME);
+
+  char *p = buf + strlen(buf);
+  while(*p != '/' && p != buf) {
+    p--;
+  }
+
+  *p = '\0';
+
+  return buf;
+}
+
 unsigned char RGB_2_raw(unsigned char R, unsigned char G, unsigned B)
 {
   unsigned char raw = 0;
@@ -38,7 +55,6 @@ unsigned char RGB_2_raw(unsigned char R, unsigned char G, unsigned B)
 int mug_read_cimg(void* cimg, char *buf)
 {
   CImg<unsigned char> src = *(CImg<unsigned char>*)cimg;
-
   unsigned char *p =(unsigned char*) buf;
   int width = src.width();
   int height = src.height();
@@ -187,9 +203,11 @@ vector< CImg<unsigned char> > numbers;
 
 void init_number_text()
 {
+  char *proc_dir = get_proc_dir();
   char temp[256];
+
   for(int i = 0; i < 10; i++) {
-    sprintf(temp, "%s/%d.bmp", NUMBER_PIC_DIR, i);
+    sprintf(temp, "%s/%s/%d.bmp", proc_dir, NUMBER_PIC_DIR, i);
     numbers.push_back(CImg<unsigned char>(temp));
   }
 }
