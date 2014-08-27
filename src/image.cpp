@@ -13,7 +13,7 @@ unsigned char green[]  = {0,   255, 0  };
 unsigned char blue[]   = {0,   0,   255};
 unsigned char yellow[] = {255, 255, 0  };
 unsigned char cyan[]   = {0,   255, 255};
-unsigned char Magenta[]= {255, 0,   255};
+unsigned char magenta[]= {255, 0,   255};
 unsigned char white[]  = {255, 255, 255};
 unsigned char black[]  = {0,   0,   0  };
 

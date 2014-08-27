@@ -60,5 +60,5 @@ error_t Mug::readMotion(motion_data_t *data)
   handle_t handle = initHandle(DEVICE_MPU);
   MUG_ASSERT(handle, "can not get handle\n");
 
-  return mug_read_motion_sensor(handle, data);
+  return mug_read_motion(handle, data);
 }

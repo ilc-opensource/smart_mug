@@ -3,6 +3,10 @@
 #include <stdlib.h>
 #include <mug.h>
 
+void on_temp(int board_temp, int mug_temp, int battery_temp)
+{
+  printf("%d, %d, %d\n", board_temp, mug_temp, battery_temp);
+}
 
 int main(int argc, char** argv)
 {
@@ -16,8 +20,12 @@ int main(int argc, char** argv)
     exit(1);
   }
 
+#ifdef USE_LIBUV
+  mug_temp_on(handle, on_temp, 1000);
+  mug_run_temp_watcher(handle);
+#else
   printf("handle: 0%x\n", handle);
-  
+ 
   while(1) {
 #if 0
     mug_read_temp(handle, &data);
@@ -28,6 +36,6 @@ int main(int argc, char** argv)
 #endif
     usleep(500*1000);
   }
-
+#endif
   return 0;
 }

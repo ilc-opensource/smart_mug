@@ -74,12 +74,13 @@ void dump_gesture(gesture_t gesture, char* info)
 
 int main()
 {
-  mug_touch_on(dump_touch);
+  handle_t handle = mug_touch_init();
+  mug_touch_on(handle, dump_touch);
 
-  mug_gesture_on(MUG_GESTURE, dump_gesture);
+  mug_gesture_on(handle, MUG_GESTURE, dump_gesture);
 
-  mug_touch_event_on(TOUCH_EVENT_ALL, dump_touch_event);
+  mug_touch_event_on(handle, TOUCH_EVENT_ALL, dump_touch_event);
 
-  mug_run_touch_thread();
-  mug_wait_for_touch_thread();
+  mug_run_touch_thread(handle);
+  mug_wait_for_touch_thread(handle);
 }

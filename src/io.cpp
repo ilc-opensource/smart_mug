@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stddef.h>
 #include <unistd.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -115,4 +116,65 @@ int get_tp_handle()
   MUG_ASSERT(handle != -1, "can not open touch panel handle\n");
   return handle;
 }
+
+int LedFrame_Set(int fd, BOOL flags, BYTE frameId)
+{
+  struct LedFrameMesg mesg;
+
+  mesg.type = FRAME_CMD_SET;
+  mesg.frame = frameId;
+  mesg.set.flags = flags;
+
+  return iohub_write_block_data(fd, IOHUB_CMD_FRAME, offsetof(struct LedFrameMesg, set) + sizeof(mesg.set), (const __u8 *)&mesg);
+}
+
+int LedFrame_Set_Row(int fd, BYTE frameId, BYTE rowId, const void *content)
+{
+  struct LedFrameMesg mesg;
+
+  mesg.type = FRAME_CMD_ROW;
+  mesg.frame = frameId;
+
+  mesg.row.index = rowId;
+  memcpy(mesg.row.content, content, sizeof(mesg.row.content));
+  return iohub_write_block_data(fd, IOHUB_CMD_FRAME, sizeof(mesg), (const __u8 *)&mesg);
+}
+
+int LedFrame_Set_Duration(int fd, BYTE frameId, DWORD ms)
+{
+  struct LedFrameMesg mesg;
+
+  mesg.type = FRAME_CMD_SET;
+  mesg.frame = frameId;
+  mesg.set.flags = FRAME_DURATION_MASK;
+  mesg.set.duration = ms;
+
+  return iohub_write_block_data(fd, IOHUB_CMD_FRAME, offsetof(struct LedFrameMesg, set) + sizeof(mesg.set), (const __u8 *)&mesg);
+}
+
+void stop_mcu_disp(int fd, int cnt)
+{
+  LedFrame_Set(fd, FRAME_ACTIVE_MASK, 0);
+
+  sleep(2);
+
+  BYTE content[BYTES_PER_ROW];
+
+  /* update frames */
+  for (BYTE frameId = 0; (frameId < cnt) && (frameId < MAX_LED_FRAMES); frameId++) {
+    LedFrame_Set(fd, FRAME_ENABLE_MASK, frameId);
+    for (BYTE rowId = 0; rowId < MAX_ROWS; rowId++) {
+      memset (content, (frameId + rowId) & 0x77, sizeof(content));
+      LedFrame_Set_Row(fd, frameId, rowId, content);
+    }
+    LedFrame_Set_Duration(fd, frameId, 500);
+  }
+}
+
+void mug_stop_mcu_disp(handle_t handle)
+{
+  stop_mcu_disp(handle, 40);
+}
+
+
 

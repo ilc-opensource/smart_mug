@@ -76,6 +76,10 @@ typedef struct uv_touch_ {
   touch_cb_t cb;
 } uv_touch_t;
 
+typedef list<uv_touch_t*> touch_list_t;
+touch_list_t *touch_list;
+
+#if 0
 void uv_touch_cb(uv_async_t *handle, int status) 
 {
   static int i = 0;
@@ -87,7 +91,24 @@ void uv_touch_cb(uv_async_t *handle, int status)
 
   free(touch);
 }
+#else
+void uv_touch_cb(uv_async_t *handle, int status) 
+{
+  touch_list_t *pending_touchs;
+  pending_touchs = (touch_list_t*)(handle->data);
+  uv_touch_t *touch;
+  for(touch_list_t::iterator itr = pending_touchs->begin();
+      itr != pending_touchs->end();
+      itr++) {
+    touch = *itr;
+    debug_printf("%s: %d (%d x %d, %d)\n", __FUNCTION__, i++, touch->x, touch->y, touch->id);  
+    touch->cb(touch->x, touch->y, touch->id);    
+  }
+  
+  pending_touchs->clear();
+}
 
+#endif
 void involk_touch_cb(touch_cb_t cb, int x, int y, int id)
 {
   static int i = 0;
@@ -98,12 +119,13 @@ void involk_touch_cb(touch_cb_t cb, int x, int y, int id)
   touch->x = x;
   touch->y = y;
   touch->id = id;
-  async_touch.data = (void*)touch;
+  touch_list->push_back(touch);
+  async_touch.data = (void*)touch_list;
 
   debug_printf("%s: %d (%d x %d, %d)\n", __FUNCTION__, i++, touch->x, touch->y, touch->id);
-  //fflush(0);
 
   uv_async_send(&async_touch);  
+
 }
 
 typedef struct uv_touch_event_ {
@@ -122,6 +144,11 @@ void uv_touch_event_cb(uv_async_t *handle, int status)
   touch_event->cb(touch_event->event, touch_event->x, touch_event->y, touch_event->id);
 
   free(touch_event);
+#ifdef USE_LIBUV
+	//dirty work around
+	usleep(1 * 1000);
+#endif
+
 }
 
 void involk_touch_event_cb(touch_event_cb_t cb, touch_event_t event, int x, int y, int id)
@@ -144,7 +171,7 @@ void involk_touch_event_cb(touch_event_cb_t cb, touch_event_t event, int x, int 
   
 #ifdef USE_LIBUV
   //dirty work around
-  usleep(1 * 1000);
+  //usleep(1 * 1000);
 #endif
 } 
 
@@ -231,6 +258,9 @@ void init_tracks()
   for(int i = 0; i < TOUCH_TRACE_NUM; i++) {
     touch_tracks[i] = new touch_trace_t();
   }
+#ifdef USE_LIBUV
+  touch_list = new touch_list_t();
+#endif
 }
 
 void clear_tracks() 
@@ -534,31 +564,58 @@ void parse_all_touch_event()
   }
 }
 
+#ifdef USE_LIBUV
+uv_timer_t touch_timer;
+void uv_touch_timer(uv_timer_t *timer, int status);
+#endif
 handle_t mug_touch_init() 
 {
 
   handle_t handle = mug_init(DEVICE_TP);
   MUG_ASSERT(handle, "can not init touch\n");
 
+  init_tracks();
+  
+#ifdef USE_LIBUV
+  //_mutex_init(&uv_mutex);
+  
+  touch_loop = uv_default_loop();
+  
+  uv_async_init(touch_loop, &async_touch,   uv_touch_cb);
+  uv_async_init(touch_loop, &async_gesture, uv_gesture_cb);
+  uv_async_init(touch_loop, &async_touch_event, uv_touch_event_cb);
+  
+#if 0
+  uv_work_t req;
+  req.data = (void*)handle;
+  
+  uv_queue_work(touch_loop, &req, uv_touch_loop, NULL);
+#else
+  touch_timer.data = (void*)handle;
+  uv_timer_init(touch_loop, &touch_timer);
+  uv_timer_start(&touch_timer, uv_touch_timer, 0 ,200);
+#endif
+#endif
+
   return handle;
 }
 
-void mug_touch_on(touch_cb_t cb) 
+void mug_touch_on(handle_t handle, touch_cb_t cb) 
 {
   touch_cb = cb;
 }
 
-void mug_touch_event_on(touch_event_t event, touch_event_cb_t cb)
+void mug_touch_event_on(handle_t handle, touch_event_t event, touch_event_cb_t cb)
 {
   touch_event_to_cb[event] = cb;
 }
 
-void mug_gesture_on(gesture_t g, gesture_cb_t cb)
+void mug_gesture_on(handle_t handle, gesture_t g, gesture_cb_t cb)
 {
   gesture_to_cb[g] = cb;
 }
 
-void mug_read_touch_data(handle_t handle)
+bool mug_read_touch_data(handle_t handle)
 {
   struct input_event events[TOUCH_READ_NUM];
   static bool is_reading = false;
@@ -583,6 +640,7 @@ void mug_read_touch_data(handle_t handle)
       clear_tracks();
     }   
     is_reading = false;
+    return false;
   } else {
     is_reading = true;
     for(int i = 0; i < TOUCH_READ_NUM; i++) {
@@ -590,45 +648,53 @@ void mug_read_touch_data(handle_t handle)
     } 
   }
 
+  return true;
+
 }
+
+
+
+#ifdef USE_LIBUV
+
 
 void mug_touch_loop(handle_t handle)
 {
-  init_tracks();
+#if 0
   while(1) {
-    mug_read_touch_data(handle); 
+    if(!mug_read_touch_data(handle))
+      break;
+    uv_timer_stop(&touch_timer);
   }
-}
 
-#ifdef USE_LIBUV
+  uv_timer_again(&touch_timer);  
+#else
+  if(mug_read_touch_data(handle)) {
+    uv_timer_set_repeat(&touch_timer, 1);
+  } else {
+    uv_timer_set_repeat(&touch_timer, 50);
+  }
+  
+#endif
+}
 
 void uv_touch_loop(uv_work_t *req)
 {
   handle_t handle = (handle_t)(req->data);
+  mug_touch_loop(handle);  
+}
+
+void uv_touch_timer(uv_timer_t *timer, int status)
+{
+  handle_t handle = (handle_t)(timer->data);
   mug_touch_loop(handle);
 }
 
-void mug_run_touch_thread()
+void mug_run_touch_thread(handle_t handle)
 {
-  handle_t handle = mug_touch_init();
-
-  //_mutex_init(&uv_mutex);
-
-  //touch_loop = uv_default_loop();
-  touch_loop = uv_loop_new();
-  uv_work_t req;
-  req.data = (void*)handle;
-
-  uv_async_init(touch_loop, &async_touch,   uv_touch_cb);
-  uv_async_init(touch_loop, &async_gesture, uv_gesture_cb);
-  uv_async_init(touch_loop, &async_touch_event, uv_touch_event_cb);
-
-  uv_queue_work(touch_loop, &req, uv_touch_loop, NULL);
-
   uv_run(touch_loop, UV_RUN_DEFAULT);
 }
 
-void mug_wait_for_touch_thread()
+void mug_wait_for_touch_thread(handle_t handle)
 {
   MUG_ASSERT(false, "can not run mug_wait_for_touch_thread\n");
 }
@@ -637,13 +703,21 @@ void close_cb(uv_handle_t* handle)
 {
 }
 
-void mug_stop_touch_thread()
+void mug_stop_touch_thread(handle_t handle)
 {
   uv_close((uv_handle_t*)touch_loop, close_cb);
   //MUG_ASSERT(false, "can not run mug_stop_touch_thread\n");
 }
 
 #else
+
+void mug_touch_loop(handle_t handle)
+{
+  while(1) {
+    mug_read_touch_data(handle);
+  }
+}
+
 void* thread_entry(void* arg)
 {
   handle_t handle = (handle_t) arg;
@@ -654,11 +728,12 @@ void* thread_entry(void* arg)
 
 pthread_t touch_thread_hdl = (pthread_t)NULL;
 
-void mug_run_touch_thread()
+void mug_run_touch_thread(handle_t handle)
 {
-  handle_t handle = mug_touch_init();
+  init_tracks();
+
   pthread_t hdl;
-  
+ 
   int err;
   err = pthread_create(&hdl, NULL, thread_entry, (void*)handle);
 

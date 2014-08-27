@@ -112,7 +112,7 @@ extern unsigned char green[3];
 extern unsigned char blue[3];
 extern unsigned char yellow[3];
 extern unsigned char cyan[3];
-extern unsigned char Magenta[3];
+extern unsigned char magenta[3];
 extern unsigned char white[3];
 extern unsigned char black[3];
 
@@ -129,6 +129,7 @@ void     mug_close(handle_t handle);
 handle_t mug_disp_init();
 error_t  mug_disp_raw(handle_t handle, char* imgData);
 error_t  mug_disp_raw_N(handle_t handle, char* imgData, int number, int interval);
+void     mug_stop_mcu_disp(handle_t handle);
 
 // raw image buffer
 char* mug_create_raw_buffer();
@@ -149,30 +150,34 @@ void  mug_number_text_shape(int *width, int *height);
 
 // motion sensor
 typedef struct _MPU6050 motion_data_t;
-typedef void (*motion_cb_t)(motion_data_t *motion);
+typedef void (*motion_cb_t)(int, int, int, int, int, int);
 
-handle_t mug_motion_sensor_init();
-error_t  mug_read_motion_sensor(handle_t handle, motion_data_t *data);
-void     mug_read_motion_sensor_async(handle_t handle, motion_cb_t cb);
+handle_t mug_motion_init();
+error_t  mug_read_motion(handle_t handle, motion_data_t *data);
+void     mug_motion_on(handle_t handle, motion_cb_t cb, int interval);
+void     mug_run_motion_watcher(handle_t handle);
+
 
 // temprature
+typedef void (*temp_cb_t)(int, int, int);
+
 handle_t mug_temp_init();
 void     mug_read_temp(handle_t handle, temp_data_t *data);
 int      mug_read_board_temp(handle_t handle);
 int 	 mug_read_mug_temp(handle_t handle);
 int 	 mug_read_battery_temp(handle_t handle);
-
+int      mug_temp_on(handle_t handle, temp_cb_t cb, int interval);
+void     mug_run_temp_watcher(handle_t handle);
 
 
 // touch panel
 handle_t  mug_touch_init();
-void      mug_touch_on(touch_cb_t cb);
-void      mug_gesture_on(gesture_t g, gesture_cb_t cb);
-void      mug_touch_event_on(touch_event_t event, touch_event_cb_t cb);
-void      mug_touch_loop(handle_t handle);
-void      mug_run_touch_thread();
-void      mug_stop_touch_thread();
-void      mug_wait_for_touch_thread();
+void      mug_touch_on(handle_t handle, touch_cb_t cb);
+void      mug_gesture_on(handle_t handle, gesture_t g, gesture_cb_t cb);
+void      mug_touch_event_on(handle_t handle, touch_event_t event, touch_event_cb_t cb);
+void      mug_run_touch_thread(handle_t handle);
+void      mug_stop_touch_thread(handle_t handle);
+void      mug_wait_for_touch_thread(handle_t handle);
 
 // utils
 char*  get_proc_dir();

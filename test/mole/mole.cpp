@@ -106,8 +106,9 @@ mole_list_t mole_list;
 score_t     score;
 int         round_num = ROUND_NUM;
 #if !cimg_display
-handle_t    handle;
+handle_t    disp_handle;
 #endif
+handle_t    touch_handle;
 
 void draw_mole(mole_t *mole, CImg<unsigned char> *pic) 
 {
@@ -145,7 +146,7 @@ void disp_canvas()
 #else
 void disp_canvas()
 {
-  mug_disp_cimg(handle, &canvas); 
+  mug_disp_cimg(disp_handle, &canvas); 
 }
 #endif
 
@@ -250,7 +251,7 @@ void touch_on(int x, int y, int id)
 
 void *touch_thread(void *arg)	
 {
-  mug_run_touch_thread();
+  mug_run_touch_thread(touch_handle);
 }
 
 void init()
@@ -263,8 +264,9 @@ void init()
   pthread_mutex_init(&mutex, NULL);
 
 #if !cimg_display
-  handle = mug_disp_init();
-  mug_touch_on(touch_on);
+  disp_handle = mug_disp_init();
+  touch_handle = mug_touch_init();
+  mug_touch_on(touch_handle, touch_on);
 
 #ifdef USE_LIBUV  
   pthread_t hdl;
@@ -279,7 +281,7 @@ void init()
 
 void finish()
 {
-  mug_stop_touch_thread();
+  mug_stop_touch_thread(touch_handle);
   pthread_mutex_destroy(&mutex);
 }
 

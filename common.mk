@@ -2,7 +2,7 @@ LD_FLAGS=-L$(ROOT)/bin -lmug -lpthread -lrt
 
 INC_FLAGS=-I$(ROOT)/include -I$(ROOT)/lib/CImg -I$(ROOT)/lib/libuv/include
 
-C_FLAGS=-O0 -g $(INC_FLAGS)
+C_FLAGS=-O0 -g $(INC_FLAGS) -fpermissive
 
 HAS_LIBUV = $(shell ls -d $(ROOT)/lib/libuv 2>/dev/null)
 
