@@ -5,9 +5,9 @@ var path = require('path');
 var io = require('../../main/highLevelAPI/io.js');
 var sys = require('../../main/highLevelAPI/sys.js');
 
-var logPrefix = '[app temprature] '
+var logPrefix = '[app temperature] '
 
-var appProcess = child_process.execFile(path.join(__dirname, 'temprature'));
+var appProcess = child_process.execFile(path.join(__dirname, 'temperature'));
 appProcess.on('close', function (code, signal) {
 });
 

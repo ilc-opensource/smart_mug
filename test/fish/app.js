@@ -7,7 +7,7 @@ var sys = require('../../main/highLevelAPI/sys.js');
 
 var logPrefix = '[app fish] '
 
-var appProcess = child_process.execFile(path.join(__dirname, 'fish'));
+var appProcess = child_process.execFile(path.join(__dirname, 'fish'), [], {'cwd':__dirname});
 appProcess.on('close', function (code, signal) {
 });
 

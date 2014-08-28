@@ -22,7 +22,7 @@ void clear_canvas()
                         black);
 
 }
-
+#if 0
 void draw_temp(int t)
 {
   clear_canvas();
@@ -45,7 +45,21 @@ void draw_temp(int t)
   mug_draw_number_cimg(&canvas, 0, 0, buf, color);
   mug_disp_cimg(disp_handle, &canvas);
 }
+#else
+void draw_temp(int t)
+{
+  clear_canvas();
+ 
+  char temp[5];
 
+  sprintf(temp, "%d", t);
+
+  canvas.draw_text(0, 0, temp, cyan, black);
+
+  mug_disp_cimg(disp_handle, &canvas);
+}
+
+#endif
 void on_temp(int board_temp, int mug_temp, int battery_temp)
 {
   printf("%d, %d, %d\n", board_temp, mug_temp, battery_temp);

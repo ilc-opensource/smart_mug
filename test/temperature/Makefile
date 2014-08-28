@@ -6,8 +6,8 @@ SRC_PATH=.
 BUILD_PATH=build
 
 ## Edit #######################################
-TARGET=$(BIN_PATH)/temprature
-SRCS=temprature.cpp
+TARGET=$(BIN_PATH)/temperature
+SRCS=temperature.cpp
 ###############################################
 
 OBJS=$(addprefix $(BUILD_PATH)/, $(SRCS:.cpp=.o))
