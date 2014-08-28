@@ -292,7 +292,17 @@ int main(int argc, char **argv)
   }
 
   init();
- 
+
+  clear_canvas();
+  canvas.draw_text(0, 0, "ok?", yellow, 1.0, 6);
+  disp_canvas();
+  usleep(1000 * 1000);
+
+  clear_canvas();
+  canvas.draw_text(0, 0, "GO!", magenta, 1.0, 6);
+  disp_canvas();
+  usleep(1000 * 1000);
+  
   for(int i = 0; i < round_num; i++) {
     next_round(2);
     usleep(1000*1000);
