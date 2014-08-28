@@ -1,7 +1,17 @@
-TESTS= show_raw show_raw_N animation show_image motion touch temprature mole image_to_raw fish get_ip touch_trace stop_mcu_flush
+PACKS=fish temprature motion get_ip touch_trace mole
+
+TESTS= $(PACKS) show_raw show_raw_N animation show_image touch image_to_raw stop_mcu_flush
+
+PACK_BIN=packs.tgz
 
 all:
 	@for i in $(TESTS); do make -C $$i; done
 
 clean:
 	@for i in $(TESTS); do make clean -C $$i; done
+	rm -f $(PACK_BIN) 
+
+pack:
+	tar -czvf $(PACK_BIN) $(PACKS)
+
+.PHONY: pack

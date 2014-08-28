@@ -1,0 +1,8 @@
+{
+  "name"   : "whac-a-mole",
+  "package": "com.intel.smart_mug.whac-a-mole",
+  "version": "0.0.1",
+  "icon"   : "icon.bmp",
+  "start"  : "app.js",
+  "description": "whac randomly displayed moles"
+}
