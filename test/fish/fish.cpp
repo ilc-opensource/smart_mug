@@ -53,7 +53,7 @@ handle_t temp_handle;
 CImg<unsigned char> canvas(SCREEN_WIDTH, SCREEN_HEIGHT, 1, 3, 0);
 fish_t *fish = NULL;
 
-void normalize_color(CImg<unsigned char> &img)
+static void normalize_color(CImg<unsigned char> &img)
 {
   for(int r = 0; r < img.height(); r++) {
     for(int c = 0; c < img.width(); c++) {
@@ -66,7 +66,6 @@ void normalize_color(CImg<unsigned char> &img)
       }
     }
   }
-
 }
 
 void clear_canvas()

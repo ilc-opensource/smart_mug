@@ -198,6 +198,21 @@ int mug_disp_img_N(handle_t handle, char *names, int interval)
   mug_disp_raw_N(handle, raw, num, interval); 
 }
 
+void normalize_color(CImg<unsigned char> &img)
+{
+  for(int r = 0; r < img.height(); r++) {
+    for(int c = 0; c < img.width(); c++) {
+      for(int color = 0; color < 3; color++) {
+        if(img(c, r, 0, color) < 128) {
+          img(c, r, 0, color) = 0;
+        } else {
+          img(c, r, 0, color) = 255;
+        }
+      }
+    }
+  }
+}
+
 #define NUMBER_PIC_DIR "number_pic"
 vector< CImg<unsigned char> > numbers;
 
@@ -205,10 +220,12 @@ void init_number_text()
 {
   char *proc_dir = get_proc_dir();
   char temp[256];
-
+  
   for(int i = 0; i < 10; i++) {
     sprintf(temp, "%s/%s/%d.bmp", proc_dir, NUMBER_PIC_DIR, i);
-    numbers.push_back(CImg<unsigned char>(temp));
+    CImg<unsigned char> img(temp);
+    normalize_color(img);
+    numbers.push_back(img);
   }
 }
 

@@ -68,10 +68,17 @@ void show_ip(char** splits)
 
   for(int i = 0; i < 4; i++) {
     clear_canvas();
-    mug_draw_number_cimg(&canvas, 0, 0, splits[i], red);
+    mug_draw_number_cimg(&canvas, 0, 0, splits[i], cyan);
     disp_canvas();
     usleep(INTERVAL * 1000);    
   }
+}
+
+void show_no_ip()
+{
+  clear_canvas();
+  canvas.draw_text(0, 0, "----", red, black);
+  disp_canvas();
 }
 
 void init()
@@ -135,7 +142,9 @@ int main(int argc, char **argv)
 
   if(ip_str != NULL) {
     split_str = split_ip(ip_str);
+    show_ip(split_str);
+  } else {
+    show_no_ip();    
   }
 
-  show_ip(split_str);
 }
