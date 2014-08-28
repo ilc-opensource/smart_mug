@@ -1,0 +1,8 @@
+{
+  "name"   : "fish-for-health",
+  "package": "com.intel.smart_mug.fish-for-health",
+  "version": "0.0.1",
+  "icon"   : "icon.bmp",
+  "start"  : "app.js",
+  "description": "a digital pet for monitoring user water drinking behavior"
+}

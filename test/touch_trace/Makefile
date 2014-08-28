@@ -6,8 +6,8 @@ SRC_PATH=.
 BUILD_PATH=build
 
 ## Edit #######################################
-TARGET=$(BIN_PATH)/draw
-SRCS=draw.cpp
+TARGET=$(BIN_PATH)/touch_trace
+SRCS=touch_trace.cpp
 ###############################################
 
 OBJS=$(addprefix $(BUILD_PATH)/, $(SRCS:.cpp=.o))

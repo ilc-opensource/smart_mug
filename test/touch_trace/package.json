@@ -1,0 +1,8 @@
+{
+  "name"   : "touch_trace",
+  "package": "com.intel.smart_mug.touch_trace",
+  "version": "0.0.1",
+  "icon"   : "icon.bmp",
+  "start"  : "app.js",
+  "description": "display touch trace"
+}
