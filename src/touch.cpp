@@ -103,6 +103,7 @@ void uv_touch_cb(uv_async_t *handle, int status)
     touch = *itr;
     debug_printf("%s: %d (%d x %d, %d)\n", __FUNCTION__, i++, touch->x, touch->y, touch->id);  
     touch->cb(touch->x, touch->y, touch->id);    
+    free(touch);
   }
   
   pending_touchs->clear();
@@ -135,20 +136,25 @@ typedef struct uv_touch_event_ {
   touch_event_cb_t cb;
 } uv_touch_event_t;
 
+typedef list<uv_touch_event_t*> touch_event_list_t;
+touch_event_list_t *touch_event_list;
+
 void uv_touch_event_cb(uv_async_t *handle, int status)
 {
-  uv_touch_event_t *touch_event = (uv_touch_event_t*)(handle->data);
+  touch_event_list_t *pending = (touch_event_list_t*)(handle->data);
+  uv_touch_event_t *event;
 
-  debug_printf("%s event %d @ (%d, %d, %d)\n", __FUNCTION__, touch_event->event, touch_event->x, touch_event->y, touch_event->id);
+  for(touch_event_list_t::iterator itr = pending->begin();
+      itr != pending->end();
+      itr++) {
+      
+    event = *itr;
+    debug_printf("%s event %d @ (%d, %d, %d)\n", __FUNCTION__, event->event, event->x, event->y, event->id);
+    event->cb(event->event, event->x, event->y, event->id);
+    free(event);
+  }
 
-  touch_event->cb(touch_event->event, touch_event->x, touch_event->y, touch_event->id);
-
-  free(touch_event);
-#ifdef USE_LIBUV
-	//dirty work around
-	usleep(1 * 1000);
-#endif
-
+  pending->clear();
 }
 
 void involk_touch_event_cb(touch_event_cb_t cb, touch_event_t event, int x, int y, int id)
@@ -163,7 +169,8 @@ void involk_touch_event_cb(touch_event_cb_t cb, touch_event_t event, int x, int 
   touch_event->y = y;
   touch_event->id = id;
 
-  async_touch_event.data = (void*)touch_event;
+  touch_event_list->push_back(touch_event);
+  async_touch_event.data = (void*)touch_event_list;
 
   debug_printf("%s event: %d @ (%d, %d, %d)\n", __FUNCTION__, event, x, y, id);
 
@@ -181,13 +188,25 @@ typedef struct uv_gesture_ {
   gesture_cb_t  cb;
 } uv_gesture_t;
 
+typedef list<uv_gesture_t*> gesture_list_t;
+gesture_list_t *gesture_list;
+
 void uv_gesture_cb(uv_async_t *handle, int status)
 {
-  uv_gesture_t *gesture = (uv_gesture_t*)(handle->data);
-  debug_printf("%s\n", __FUNCTION__);
-  gesture->cb(gesture->gesture, gesture->info);
+  gesture_list_t *pending = (gesture_list_t*)(handle->data);
 
-  free(gesture);
+  uv_gesture_t *gesture;
+
+  for(gesture_list_t::iterator itr =  pending->begin();
+      itr != pending->end();
+      itr++) {
+    gesture = *itr;       
+    debug_printf("%s: %d\n", __FUNCTION__, gesture);
+    gesture->cb(gesture->gesture, gesture->info);
+    free(gesture);
+  }
+
+  pending->clear();
 }
 
 void involk_gesture_cb(gesture_cb_t cb, gesture_t g, char* info)
@@ -199,7 +218,10 @@ void involk_gesture_cb(gesture_cb_t cb, gesture_t g, char* info)
   gesture->gesture = g;
   gesture->info = info;
   gesture->cb = cb;
-  async_gesture.data = (void*)gesture;
+
+  gesture_list->push_back(gesture);
+  
+  async_gesture.data = (void*)gesture_list;
 
   debug_printf("%s\n", __FUNCTION__);
 
@@ -260,6 +282,8 @@ void init_tracks()
   }
 #ifdef USE_LIBUV
   touch_list = new touch_list_t();
+  touch_event_list = new touch_event_list_t();
+  gesture_list = new gesture_list_t();
 #endif
 }
 
