@@ -28,18 +28,29 @@ void on_touch(int x, int y, int id)
   mug_disp_cimg(disp_handle, &canvas);
 }
 
-void on_touch_event(touch_event_t e, int x, int y, int id)
+void clear_canvas()
 {
-  printf("event: %d\n", e);
   canvas.draw_rectangle(0, 0, 0,
                         SCREEN_WIDTH, SCREEN_HEIGHT, 0,
                         black);
+
+}
+
+void on_touch_event(touch_event_t e, int x, int y, int id)
+{
+  printf("event: %d\n", e);
+  clear_canvas();
 }
 
 int main()
 {
   touch_handle = mug_touch_init();
   disp_handle = mug_disp_init();
+
+  clear_canvas();
+  canvas.draw_text(0, 0, "ok", cyan, black);
+  mug_disp_cimg(disp_handle, &canvas);
+  clear_canvas();
 
   mug_touch_on(touch_handle, on_touch);
   mug_touch_event_on(touch_handle, TOUCH_UP, on_touch_event);
