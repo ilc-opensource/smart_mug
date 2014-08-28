@@ -497,8 +497,8 @@ bool is_hold(touch_trace_t *tr)
   int xdiff = end.x - start.x;
   int ydiff = end.y - start.y;
 
-  return((-HOLD_MIN_PIXEL < xdiff && xdiff < HOLD_MIN_PIXEL )
-         && (-HOLD_MIN_PIXEL < ydiff && ydiff < HOLD_MIN_PIXEL ));
+  return((-HOLD_MIN_PIXEL <= xdiff && xdiff <= HOLD_MIN_PIXEL )
+         && (-HOLD_MIN_PIXEL <= ydiff && ydiff <= HOLD_MIN_PIXEL ));
 
 }
 
