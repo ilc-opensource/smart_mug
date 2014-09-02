@@ -35,18 +35,19 @@ int voltage_to_temp(uint16_t data)
   return (int)tempf;
 }
 
-void mug_read_temp(handle_t handle, temp_data_t *temp)
+mug_error_t mug_read_temp(handle_t handle, temp_data_t *temp)
 {
   uint16_t voltage[TEMP_NUM];
   memset(voltage, 0, sizeof(voltage));
 #ifdef USE_IOHUB
-  error_t err = iohub_send_command(handle, IOHUB_CMD_ADC, (char*)&voltage, sizeof(voltage));
+  mug_error_t err = iohub_send_command(handle, IOHUB_CMD_ADC, (char*)&voltage, sizeof(voltage));
 #else
-  error_t err = dev_send_command(handle, IOHUB_CMD_ADC, (char*)&voltage, sizeof(voltage));
+  mug_error_t err = dev_send_command(handle, IOHUB_CMD_ADC, (char*)&voltage, sizeof(voltage));
 #endif
   temp->board_temp   = voltage_to_temp(voltage[0]);
   temp->mug_temp     = voltage_to_temp(voltage[1]);
   temp->battery_temp = voltage_to_temp(voltage[2]);
+  return err;
 }
 
 int mug_read_board_temp(handle_t handle)

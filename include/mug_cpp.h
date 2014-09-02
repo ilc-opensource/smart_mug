@@ -9,7 +9,7 @@ public:
   ~Mug();
   int dispRaw(char* data, int number = 1, int interval = 40);
   int dispImgs(char* names, int interval = 40);
-  error_t readMotion(motion_data_t *data);
+  mug_error_t readMotion(motion_data_t *data);
 private:
   handle_t *m_handles;
   int       m_handleNum;

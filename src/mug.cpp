@@ -55,7 +55,7 @@ int Mug::dispImgs(char* names, int interval)
   return mug_disp_img_N(handle, names, interval);
 }
 
-error_t Mug::readMotion(motion_data_t *data)
+mug_error_t Mug::readMotion(motion_data_t *data)
 {
   handle_t handle = initHandle(DEVICE_MPU);
   MUG_ASSERT(handle, "can not get handle\n");

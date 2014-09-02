@@ -369,7 +369,8 @@ void normalize_point(touch_point_t *point)
   int oldy = point->y; 
   
   point->x = TOUCH_WIDTH  - oldy; 
-  point->y = TOUCH_HEIGHT - oldx;
+  //point->y = TOUCH_HEIGHT - oldx;
+  point->y = oldx;
 }
 
 void parse_event(input_event *event)
@@ -645,15 +646,17 @@ bool mug_read_touch_data(handle_t handle)
   static bool is_reading = false;
 
 #ifdef USE_IOHUB
-  error_t err = iohub_send_command(handle, 
-                                   IOHUB_CMD_TOUCH_PANEL, 
-                                   (char*)events,
-                                   sizeof(events));
+  mug_error_t err;
+  err = iohub_send_command(handle, 
+                           IOHUB_CMD_TOUCH_PANEL, 
+                           (char*)events,
+                           sizeof(events));
 #else
-  error_t err = dev_send_command(handle, 
-                                 IOHUB_CMD_TOUCH_PANEL, 
-                                 (char*)events,
-                                 sizeof(events));
+  mug_error_t err;
+  err = dev_send_command(handle, 
+                         IOHUB_CMD_TOUCH_PANEL, 
+                         (char*)events,
+                         sizeof(events));
 #endif
 
   if(err) {

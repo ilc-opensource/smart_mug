@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include <linux/types.h>
 #include <iohub_client.h>
-
+#include <mug.h>
 #ifdef __cplusplus
 extern "C" { 
 #endif
@@ -50,16 +50,16 @@ struct __attribute__((packed)) LedFrameMesg {
 #define FRAME_CMD_SET       1
 
 
-int iohub_write_block_data(int fd, __u8 cmd, __u8 length, const __u8 *data);
-int iohub_read_block_data(int fd, __u8 cmd, __u8 length, __u8 *data);
-int iohub_user_i2c_init();
+int iohubd_write_block_data(int fd, __u8 cmd, __u8 length, const __u8 *data);
+int iohubd_read_block_data(int fd, __u8 cmd, __u8 length, __u8 *data);
+int iohubd_user_i2c_init();
 
-handle_t dev_open(device_t type);
-error_t  dev_send_command(handle_t handle, cmd_t cmdtype, char *data, int message_len);
-void     dev_close(handle_t handle);
+handle_t    dev_open(device_t type);
+mug_error_t dev_send_command(handle_t handle, cmd_t cmdtype, char *data, int message_len);
+void        dev_close(handle_t handle);
 
-int      get_mpu_handle();
-int      get_tp_handle();
+int         get_mpu_handle();
+int         get_tp_handle();
 
 #ifdef __cplusplus
 }

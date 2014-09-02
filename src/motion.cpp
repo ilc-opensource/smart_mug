@@ -20,7 +20,7 @@ static uv_thread_t motion_thread;
 typedef struct _req_motion_t {
   motion_data_t data;
   handle_t      handle;
-  error_t       error;
+  mug_error_t   error;
   motion_cb_t   cb; 
 }req_motion_t;
 
@@ -103,15 +103,15 @@ handle_t mug_motion_init()
   return mug_init(DEVICE_MPU);
 }
 
-error_t mug_read_motion(handle_t handle, motion_data_t *data)
+mug_error_t mug_read_motion(handle_t handle, motion_data_t *data)
 {
 #ifdef USE_IOHUB
-  error_t err = iohub_send_command(handle, 
+  mug_error_t err = iohub_send_command(handle, 
                                    IOHUB_CMD_MOTION_SENSOR, 
                                    (char*)data, 
                                    sizeof(motion_data_t));
 #else
-  error_t err = dev_send_command(handle,
+  mug_error_t err = dev_send_command(handle,
                                  IOHUB_CMD_MOTION_SENSOR,
                                  (char*)data,
                                  sizeof(motion_data_t));

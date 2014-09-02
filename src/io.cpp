@@ -20,7 +20,7 @@ handle_t dev_open(device_t type)
 
   case DEVICE_LED:
   case DEVICE_ADC:
-   ret = (handle_t)iohub_user_i2c_init();
+   ret = (handle_t)iohubd_user_i2c_init();
    break;
 
   case DEVICE_MPU:
@@ -65,18 +65,18 @@ int read_with_timeout(handle_t handle, cmd_t cmdtype, char *data, int message_le
   return rv;
 }
 
-error_t dev_send_command(handle_t handle, cmd_t cmdtype, char *data, int message_len)
+mug_error_t dev_send_command(handle_t handle, cmd_t cmdtype, char *data, int message_len)
 {
-  error_t err = ERROR_NONE;
+  mug_error_t err = ERROR_NONE;
   ssize_t ret;
 
   switch(cmdtype){
   case IOHUB_CMD_ADC:
-    err = (error_t)iohub_read_block_data((int)handle, cmdtype, message_len, (__u8*)data); 
+    err = (mug_error_t)iohubd_read_block_data((int)handle, cmdtype, message_len, (__u8*)data); 
     break;
 
   case IOHUB_CMD_FB:
-    err = (error_t)iohub_write_block_data((int)handle, cmdtype, message_len, (const __u8*)data); 
+    err = (mug_error_t)iohubd_write_block_data((int)handle, cmdtype, message_len, (const __u8*)data); 
     break;
   
   case IOHUB_CMD_MOTION_SENSOR:
@@ -125,7 +125,7 @@ int LedFrame_Set(int fd, BOOL flags, BYTE frameId)
   mesg.frame = frameId;
   mesg.set.flags = flags;
 
-  return iohub_write_block_data(fd, IOHUB_CMD_FRAME, offsetof(struct LedFrameMesg, set) + sizeof(mesg.set), (const __u8 *)&mesg);
+  return iohubd_write_block_data(fd, IOHUB_CMD_FRAME, offsetof(struct LedFrameMesg, set) + sizeof(mesg.set), (const __u8 *)&mesg);
 }
 
 int LedFrame_Set_Row(int fd, BYTE frameId, BYTE rowId, const void *content)
@@ -137,7 +137,7 @@ int LedFrame_Set_Row(int fd, BYTE frameId, BYTE rowId, const void *content)
 
   mesg.row.index = rowId;
   memcpy(mesg.row.content, content, sizeof(mesg.row.content));
-  return iohub_write_block_data(fd, IOHUB_CMD_FRAME, sizeof(mesg), (const __u8 *)&mesg);
+  return iohubd_write_block_data(fd, IOHUB_CMD_FRAME, sizeof(mesg), (const __u8 *)&mesg);
 }
 
 int LedFrame_Set_Duration(int fd, BYTE frameId, DWORD ms)
@@ -149,7 +149,7 @@ int LedFrame_Set_Duration(int fd, BYTE frameId, DWORD ms)
   mesg.set.flags = FRAME_DURATION_MASK;
   mesg.set.duration = ms;
 
-  return iohub_write_block_data(fd, IOHUB_CMD_FRAME, offsetof(struct LedFrameMesg, set) + sizeof(mesg.set), (const __u8 *)&mesg);
+  return iohubd_write_block_data(fd, IOHUB_CMD_FRAME, offsetof(struct LedFrameMesg, set) + sizeof(mesg.set), (const __u8 *)&mesg);
 }
 
 void stop_mcu_disp(int fd, int cnt)

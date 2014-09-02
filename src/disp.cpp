@@ -15,11 +15,11 @@ struct __attribute__((packed)) led_line_data {
   uint8_t content[MAX_COLS/2];
 };
 
-error_t mug_disp_raw(handle_t handle, char* imgData) 
+mug_error_t mug_disp_raw(handle_t handle, char* imgData) 
 {
   int row, col;
   char *p = imgData;
-  error_t err = ERROR_NONE;
+  mug_error_t err = MUG_ERROR_NONE;
 
   struct led_line_data data = {
     0, {0xff, 0xff}, {0}
@@ -50,11 +50,11 @@ error_t mug_disp_raw(handle_t handle, char* imgData)
   return err;
 }
 
-error_t mug_disp_raw_N(handle_t handle, char* imgData, int number, int interval)
+mug_error_t mug_disp_raw_N(handle_t handle, char* imgData, int number, int interval)
 {
   int semResource = resource_init(LOCK_DISPLAY_TOUCH);
   char *p = imgData;
-  error_t error = ERROR_NONE;
+  mug_error_t error = ERROR_NONE;
   int i;
   resource_wait(semResource);
   for(i = 0; i < number; i++) {
