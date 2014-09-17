@@ -109,6 +109,17 @@ extern unsigned char magenta[3];
 extern unsigned char white[3];
 extern unsigned char black[3];
 
+typedef enum {
+  RED,
+  GREEN,
+  BLUE,
+  YELLOW,
+  CYAN,
+  MAGENTA,
+  WHITE,
+  BLACK
+} mug_color_t;
+
 #ifdef __cplusplus
 extern "C" { 
 #endif
@@ -143,14 +154,29 @@ int   mug_disp_cimg(handle_t handle, void *cimg);
 void  mug_draw_number_cimg(void *img, int col, int row, char *str, unsigned char* color);
 void  mug_number_text_shape(int *width, int *height);
 
+// cimg handle
+typedef unsigned long cimg_handle_t;
+cimg_handle_t  mug_new_cimg_handle(int width, int height);
+cimg_handle_t  mug_new_canvas();
+cimg_handle_t  mug_load_cimg_handle(char* fname);
+int            mug_disp_cimg_handle(handle_t handle, cimg_handle_t cimg);
+void           mug_draw_number_cimg_handle(cimg_handle_t canvas, int col, int row, int num, mug_color_t color);
+void           mug_draw_cimg_handle(cimg_handle_t c, int col, int row, cimg_handle_t img);
+void           mug_destroy_cimg_handle(cimg_handle_t hdl);
+char*          mug_cimg_handle_to_raw(cimg_handle_t cimg);
 
 // motion sensor
 typedef struct _MPU6050 motion_data_t;
 typedef void (*motion_cb_t)(int, int, int, int, int, int);
+typedef void (*motion_angel_cb_t)(float, float, float);
+
 
 handle_t     mug_motion_init();
 mug_error_t  mug_read_motion(handle_t handle, motion_data_t *data);
-void         mug_motion_on(handle_t handle, motion_cb_t cb, int interval);
+void         mug_motion_on(handle_t handle, motion_cb_t cb);
+void         mug_motion_angle_on(handle_t handle, motion_angel_cb_t acb);
+void         mug_set_motion_timer(handle_t handle, int interval);
+
 void         mug_run_motion_watcher(handle_t handle);
 
 

@@ -283,7 +283,7 @@ int main()
   uv_timer_start(&fish_timer, run_fish_timer, 0, INTERVAL);
 
   // read motion
-  mug_motion_on(motion_handle, on_motion,  200);
+  mug_motion_on(motion_handle, on_motion);
 
   // read temprature
   mug_temp_on(temp_handle, on_temp, 1000);

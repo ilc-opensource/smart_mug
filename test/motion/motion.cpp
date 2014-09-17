@@ -58,6 +58,11 @@ void on_motion(int ax, int ay, int az, int gx, int gy, int gz)
   mug_disp_cimg(disp_handle, &canvas);
 }
 
+void on_angle(float angle_x, float angle_y, float angle_z)
+{
+  printf("[ %f, %f, %f ]\n", angle_x, angle_y, angle_z);
+}
+
 void on_touch(int x, int y, int id)
 {
   printf("(%d, %d, %d)\n", x, y, id);
@@ -75,7 +80,9 @@ int main(int argc, char** argv)
   init();
   
 #if 1  
-  mug_motion_on(motion_handle, on_motion, 200);
+  //mug_motion_on(motion_handle, on_motion);
+  mug_motion_angle_on(motion_handle, on_angle);
+  mug_set_motion_timer(motion_handle, 1000);
   //mug_run_touch_thread();
   mug_run_motion_watcher(motion_handle);
 #else

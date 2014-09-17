@@ -31,6 +31,9 @@ using namespace std;
 
 #define IS_TWO_FINGER(tk) (tk[0]->size() != 0 && tk[1]->size() != 0)
 
+#define TOUCH_IDLE_TIME 10
+#define TOUCH_BUSY_TIME 1
+
 #define SCALE_X(x) ((x) / TOUCH_WIDTH_SCALE)
 #define SCALE_Y(y) ((y) / TOUCH_HEIGHT_SCALE)
 
@@ -618,7 +621,7 @@ handle_t mug_touch_init()
 #else
   touch_timer.data = (void*)handle;
   uv_timer_init(touch_loop, &touch_timer);
-  uv_timer_start(&touch_timer, uv_touch_timer, 0 ,200);
+  uv_timer_start(&touch_timer, uv_touch_timer, 0 ,TOUCH_IDLE_TIME);
 #endif
 #endif
 
@@ -696,9 +699,9 @@ void mug_touch_loop(handle_t handle)
   uv_timer_again(&touch_timer);  
 #else
   if(mug_read_touch_data(handle)) {
-    uv_timer_set_repeat(&touch_timer, 1);
+    uv_timer_set_repeat(&touch_timer, TOUCH_BUSY_TIME);
   } else {
-    uv_timer_set_repeat(&touch_timer, 50);
+    uv_timer_set_repeat(&touch_timer, TOUCH_IDLE_TIME);
   }
   
 #endif
