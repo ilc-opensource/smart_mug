@@ -12,6 +12,9 @@
 #include <io.h>
 #include <mug.h>
 
+#define TP_DEV_PATH         "/dev/input/event2"
+#define MPU_DEV_PATH        "/sys/bus/i2c/drivers/mpu60450/6-0068/hwmon/hwmon6/device/data"
+
 handle_t dev_open(device_t type)
 {
   handle_t ret = 0;
@@ -98,12 +101,19 @@ mug_error_t dev_send_command(handle_t handle, cmd_t cmdtype, char *data, int mes
 
 int get_mpu_handle()
 {
+#if 0
   char node_path[MAX_STRING_SIZE];
+  memset(node_path, 0, sizeof(node_path));
   /* open data node */
-  char module_name[MAX_STRING_SIZE] = "hwmon7";
-  snprintf(node_path, MAX_STRING_SIZE, "/sys/class/hwmon/%s/device/data", module_name);
-	
+  char module_name[MAX_STRING_SIZE] = "hwmon6";
+  //snprintf(node_path, MAX_STRING_SIZE, "/sys/class/hwmon/%s/device/data", module_name);
+  snprintf(node_path, MAX_STRING_SIZE, "%s/%s/device/data", MPU_DEV_PATH_PREFIX, module_name);
+ 
   int handle = open(node_path, O_RDONLY);
+#endif
+
+  int handle = open(MPU_DEV_PATH, O_RDONLY);
+
   MUG_ASSERT(handle != -1, "can not open mpu handle\n");
 
   return handle;
@@ -112,7 +122,9 @@ int get_mpu_handle()
 int get_tp_handle()
 {
   char inputdevname[80]="/dev/input/event1";
-  int handle = open(inputdevname, O_RDONLY);
+  //int handle = open(inputdevname, O_RDONLY);
+  int handle = open(TP_DEV_PATH, O_RDONLY);
+
   MUG_ASSERT(handle != -1, "can not open touch panel handle\n");
   return handle;
 }

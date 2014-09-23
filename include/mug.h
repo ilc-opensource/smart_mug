@@ -25,8 +25,9 @@
     assert(0);    \
   }
 
-#ifndef _LIBIOHUB_H_
 typedef long handle_t;
+
+#ifndef _LIBIOHUB_H_
 
 typedef enum {
   DEVICE_INVALID = -1,

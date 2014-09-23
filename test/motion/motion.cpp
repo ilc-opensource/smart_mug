@@ -80,7 +80,7 @@ int main(int argc, char** argv)
   init();
   
 #if 1  
-  //mug_motion_on(motion_handle, on_motion);
+  mug_motion_on(motion_handle, on_motion);
   mug_motion_angle_on(motion_handle, on_angle);
   mug_set_motion_timer(motion_handle, 1000);
   //mug_run_touch_thread();

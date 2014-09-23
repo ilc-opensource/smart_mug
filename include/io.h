@@ -7,12 +7,12 @@ extern "C" {
 #endif
 
 #ifndef BYTE
-typedef uint8_t BOOL;
+//typedef uint8_t BOOL;
 typedef uint8_t BYTE;
 typedef uint32_t DWORD;
 
-#define TRUE  1
-#define FALSE 0
+//#define TRUE  1
+//#define FALSE 0
 #endif
 
 #define BYTES_PER_ROW (16 / 2)
