@@ -2,11 +2,20 @@
 
 #include <list>
 #include <vector>
+#include <string>
+
 using namespace std;
 
 #define cimg_display 0
 #include <CImg.h>
 using namespace cimg_library;
+
+#include "ft2build.h"
+#include FT_FREETYPE_H
+FT_Library ftlib;
+FT_Face face;
+
+#define DEFAULT_FONT "simhei.ttf"
 
 unsigned char red[]    = {255, 0,   0  };
 unsigned char green[]  = {0,   255, 0  };
@@ -50,6 +59,10 @@ unsigned char RGB_2_raw(unsigned char R, unsigned char G, unsigned B)
     raw |= 4;
 
   return raw; 
+}
+
+unsigned char color_2_raw(unsigned char *color) {
+  return RGB_2_raw(color[0], color[1], color[2]);
 }
 
 int mug_read_cimg(void* cimg, char *buf)
@@ -98,6 +111,13 @@ char* mug_create_raw_buffer()
   char *ret;
   ret = (char*)malloc(COMPRESSED_SIZE);
   return ret;
+}
+
+void mug_set_pixel_raw_color(char *raw, int col, int row, unsigned char color) {
+  int pack_col = col / 2;
+  int col_offset = col % 2;
+  
+  *(unsigned char*)(raw + row * MAX_COMPRESSED_COLS + pack_col) |= (color & 0xf) << (4 * col_offset);
 }
 
 void mug_free_raw_buffer(char *buf) 
@@ -220,7 +240,7 @@ void normalize_color(CImg<unsigned char> &img)
 #define NUMBER_PIC_DIR "number_pic"
 vector< CImg<unsigned char> > numbers;
 
-void init_number_text(char *path)
+void init_number_text(const char *path)
 {
   if(path == NULL) {
     path = get_proc_dir();
@@ -385,10 +405,118 @@ void mug_destroy_cimg_handle(cimg_handle_t hdl)
   delete((CImg<unsigned char>*)hdl);
 }
 
-char raw_buf[COMPRESSED_SIZE];
-
 char* mug_cimg_handle_to_raw(cimg_handle_t cimg)
 {
-  mug_read_cimg((void*)cimg, raw_buf);
-  return raw_buf;
+  char *raw = mug_create_raw_buffer();
+  mug_read_cimg((void*)cimg, raw);
+  return raw;
+}
+
+/*
+ libtruetype for cimg from https://github.com/tttzof351/cimg-and-freetype
+
+ */
+void initFreetype(
+  FT_Library& ftlib,
+  FT_Face& face,
+  const std::string& fontFullName
+){
+  FT_Error fterr;
+
+  if((fterr = FT_Init_FreeType( &ftlib ))) {
+    throw "Error init freetype";
+  }
+
+  if((fterr = FT_New_Face(ftlib, fontFullName.c_str(), 0, &face))){
+    if(fterr == FT_Err_Unknown_File_Format) {
+      throw "Error feetype, Unsupported font";
+    } else {
+      throw "Error feetype, new face";
+    }
+  }
+}
+
+void closeFreetype(
+  FT_Library& ftlib,
+  FT_Face& face
+){
+  FT_Done_Face(face);
+  FT_Done_FreeType(ftlib);
+}
+
+void drawGlyph(
+  FT_GlyphSlot& glyphSlot,
+  CImg<unsigned char>& image,
+  const int& shiftX,
+  const int& shiftY,
+  unsigned char fontColor[] = NULL
+){
+  unsigned char buff[] = {255, 255, 255};
+  if (fontColor == NULL){
+    fontColor = buff;
+  }
+
+  float alpha = 0;
+  for (int y = 0; y < glyphSlot->bitmap.rows; ++y){
+    for (int x = 0; x < glyphSlot->bitmap.width; ++x){
+
+      unsigned char glyphValue = glyphSlot->bitmap.buffer[y * glyphSlot->bitmap.width + x];
+      alpha = (255.0f - glyphValue) / 255.0f;
+
+      cimg_forC(image, c){
+        unsigned char value = (float) glyphValue*fontColor[c]/(255.0f);
+        image(x + shiftX, y + shiftY, c) = 
+        alpha * image(x + shiftX, y + shiftY, c) + (1.0 - alpha) * value;
+      }
+    }
+  }   
+}
+
+void drawText(
+  FT_Face& face,
+  CImg<unsigned char>& image,
+  const int& heightText,
+  const std::wstring& text,
+  const int& leftTopX,
+  const int& leftTopY,
+  unsigned char fontColor[] = NULL,
+  const int separeteGlyphWidth = 1
+){
+  
+  FT_Set_Pixel_Sizes(face, 0, heightText);
+  FT_GlyphSlot glyphSlot = face->glyph;  
+  
+  int shiftX = leftTopX;
+  int shiftY = 0;
+  for(int numberSymbol = 0; numberSymbol < text.length(); ++numberSymbol){
+    shiftY = leftTopY;
+ 
+    bool isSpace = false;
+    FT_ULong symbol = text.at(numberSymbol);
+    if (symbol == ' ') {
+      symbol = 'a';
+      isSpace = true;
+    }
+
+    if(FT_Load_Char(face, symbol, FT_LOAD_RENDER)){
+       throw "Error, glyph not load!! \n";
+    }
+
+    float shiftFactor = glyphSlot->bitmap.rows - glyphSlot->bitmap_top; 
+    shiftY += shiftFactor;
+    shiftY +=  (heightText > glyphSlot->bitmap.rows) ? heightText - glyphSlot->bitmap.rows : 0;
+    
+    if(!isSpace){
+      drawGlyph(glyphSlot, image, shiftX, shiftY, fontColor);
+    }
+    shiftX += glyphSlot->bitmap.width + separeteGlyphWidth;
+  }
+}
+
+void mug_init_font(handle_t handle, char *font)
+{
+  if(font == NULL) 
+    font = (char*)DEFAULT_FONT;
+
+  initFreetype(ftlib, face, font);
 }

@@ -142,12 +142,17 @@ void         mug_stop_mcu_disp(handle_t handle);
 // raw image buffer
 char* mug_create_raw_buffer();
 void  mug_free_raw_buffer(char *buf);
+void  mug_set_pixel_raw_color(char *raw, int col, int row, unsigned char color);
 
 // image
 int   mug_read_img(char *fname, char *buf);
 int   mug_disp_img(handle_t handle, char *name); 
 char* mug_read_img_N(char* names, int *num, int *size);
 int   mug_disp_img_N(handle_t handle, char *names, int interval);
+
+//color
+unsigned char color_2_raw(unsigned char* color);
+unsigned char RGB_2_raw(unsigned char R,unsigned char G,unsigned B);
 
 // cimg
 int   mug_read_cimg(void *cimg, char *buf);
