@@ -38,7 +38,7 @@ handle_t dev_open(device_t type)
   break;
 
   case DEVICE_TP:
-	  ret = (handle_t)get_tp_handle();
+    ret = (handle_t)get_tp_handle();
   break;
   return ret;
   }

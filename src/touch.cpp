@@ -5,6 +5,9 @@
 #include <linux/input.h>
 #include <pthread.h>
 
+#include <dirent.h>
+#include <errno.h>
+
 #include <list>
 #include <vector>
 #include <map>
@@ -16,6 +19,22 @@
 #include <io.h>
 #endif
 using namespace std;
+
+#if 0
+#define TP_PRINT printf
+#else
+#define TP_PRINT(...)
+#endif
+
+#define BITS_PER_LONG (sizeof(long) * 8)
+#define NBITS(x) ((((x)-1)/BITS_PER_LONG)+1)
+#define OFF(x)  ((x)%BITS_PER_LONG)
+#define BIT(x)  (1UL<<OFF(x))
+#define LONG(x) ((x)/BITS_PER_LONG)
+#define test_bit(bit, array)    ((array[LONG(bit)] >> OFF(bit)) & 1)
+
+#define DEV_INPUT_EVENT "/dev/input"
+#define EVENT_DEV_NAME  "event"
 
 #define MT_INVALID_VALUE -1
 
@@ -432,7 +451,7 @@ bool validate_trace(touch_trace_t *tr)
 void validate_track()
 {
   touch_trace_t *tr;
-	
+
   for(int i = 0; i < TOUCH_TRACE_NUM; i++) {
     tr = touch_tracks[i];
     if(!validate_trace(tr)) {
@@ -596,10 +615,94 @@ void parse_all_touch_event()
 uv_timer_t touch_timer;
 void uv_touch_timer(uv_timer_t *timer, int status);
 #endif
+
+static bool is_touch_device(int fd)
+{
+  int i, j;
+  int version;
+  unsigned short id[4];
+  char name[256] = "Unknown";
+  unsigned long bit[EV_MAX][NBITS(KEY_MAX)];
+#ifdef INPUT_PROP_SEMI_MT
+  unsigned long propbits[INPUT_PROP_MAX];
+#endif
+  int rt;
+
+  rt = ioctl(fd, EVIOCGVERSION, &version);
+
+  TP_PRINT("Input driver version is %d.%d.%d\n",
+    version >> 16, (version >> 8) & 0xff, version & 0xff);
+
+  rt = ioctl(fd, EVIOCGID, id);
+
+  TP_PRINT("Input device ID: bus 0x%x vendor 0x%x product 0x%x version 0x%x\n",
+    id[ID_BUS], id[ID_VENDOR], id[ID_PRODUCT], id[ID_VERSION]);
+
+  rt =ioctl(fd, EVIOCGNAME(sizeof(name)), name);
+
+  TP_PRINT("Input device name: \"%s\"\n", name);
+
+  memset(bit, 0, sizeof(bit));
+  
+  rt = ioctl(fd, EVIOCGBIT(0, EV_MAX), bit[0]);
+
+  return(test_bit(EV_ABS, bit[0]));
+
+}
+
+static int is_event_device(const struct dirent *dir) {
+  return strncmp(EVENT_DEV_NAME, dir->d_name, 5) == 0;
+}
+
+static handle_t scan_devices(void)
+{
+  struct dirent **namelist;
+  int i, ndev, devnum;
+  char *filename;
+
+  ndev = scandir(DEV_INPUT_EVENT, &namelist, is_event_device, alphasort);
+  if (ndev <= 0)
+    return (handle_t)NULL;
+
+  TP_PRINT("Available devices:\n");
+
+  for (i = 0; i < ndev; i++) {
+    char fname[64];
+    int fd = -1;
+    char name[256] = "???";
+
+    snprintf(fname, sizeof(fname),
+       "%s/%s", DEV_INPUT_EVENT, namelist[i]->d_name);
+
+    fd = open(fname, O_RDONLY);
+    if (fd < 0)
+      continue;
+    ioctl(fd, EVIOCGNAME(sizeof(name)), name);
+
+    TP_PRINT("%s:    %s\n", fname, name);
+    if(is_touch_device(fd)) {
+      TP_PRINT("--> is touch panel\n");
+      asprintf(&filename, "%s/%s", DEV_INPUT_EVENT, namelist[i]->d_name);
+      return (handle_t)fd;
+    } else {
+      close(fd);
+    }
+    free(namelist[i]);
+  }
+
+  return (handle_t)NULL;
+}
+
+
 handle_t mug_touch_init() 
 {
 
+#if 0  
   handle_t handle = mug_init(DEVICE_TP);
+#else
+  handle_t handle = scan_devices();
+#endif
+
   MUG_ASSERT(handle, "can not init touch\n");
 
   init_tracks();
