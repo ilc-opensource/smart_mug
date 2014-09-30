@@ -1,6 +1,6 @@
 ROOT=.
 include common.mk
-IOHUB_ROOT= $(ROOT)/../edison
+IOHUB_ROOT= $(ROOT)/lib/edison
 
 C_FLAGS+=-I$(IOHUB_ROOT)/lib/include
 LIB_PATH=$(IOHUB_ROOT)/lib/bin
