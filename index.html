@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="viewport" content="width=640">
+
+    <link rel="stylesheet" href="stylesheets/core.css" media="screen">
+    <link rel="stylesheet" href="stylesheets/mobile.css" media="handheld, only screen and (max-device-width:640px)">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+
+    <script type="text/javascript" src="javascripts/modernizr.js"></script>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="javascripts/headsmart.min.js"></script>
+    <script type="text/javascript">
+      $(document).ready(function () {
+        $('#main_content').headsmart()
+      })
+    </script>
+    <title>Smart mug by ilc-opensource</title>
+  </head>
+
+  <body>
+    <a id="forkme_banner" href="https://github.com/ilc-opensource/smart_mug">View on GitHub</a>
+    <div class="shell">
+
+      <header>
+        <span class="ribbon-outer">
+          <span class="ribbon-inner">
+            <h1>Smart mug</h1>
+            <h2>Smart mug SDK</h2>
+          </span>
+          <span class="left-tail"></span>
+          <span class="right-tail"></span>
+        </span>
+      </header>
+
+      <section id="downloads">
+        <span class="inner">
+          <a href="https://github.com/ilc-opensource/smart_mug/zipball/master" class="zip"><em>download</em> .ZIP</a><a href="https://github.com/ilc-opensource/smart_mug/tarball/master" class="tgz"><em>download</em> .TGZ</a>
+        </span>
+      </section>
+
+
+      <span class="banner-fix"></span>
+
+
+      <section id="main_content">
+        <h1>
+<a name="high-level-cc-api-for-smart-mug" class="anchor" href="#high-level-cc-api-for-smart-mug"><span class="octicon octicon-link"></span></a>High Level C/C++ API for Smart Mug</h1>
+
+<h2>
+<a name="setup-toolchain" class="anchor" href="#setup-toolchain"><span class="octicon octicon-link"></span></a>Setup toolchain</h2>
+
+<p>First of all please setup i586 toolchain </p>
+
+<pre lang="shell"><code>source /opt/poky-edison/1.5.1/environment-setup-i586-poky-linux
+</code></pre>
+
+<h2>
+<a name="install-libuv-optional" class="anchor" href="#install-libuv-optional"><span class="octicon octicon-link"></span></a>Install libuv (optional)</h2>
+
+<p>If you only want to use C/C++ APIs, libuv is optional. But if you want to use the Javascript API, you need to build the libuv library and create Nodejs native addon with iot-io library</p>
+
+<pre lang="shell"><code>cd lib
+git clone https://github.com/joyent/libuv
+</code></pre>
+
+<p>Makefile will automatically detect libuv directory and setup compiling environment. If lib/libuv doesn't exist, it will build with pthread.</p>
+
+<p>NOTICE: Make sure the version of libuv you checked out is the same as which of libuv used in nodejs. For example, the nodejs 0.10.28 uses libuv 0.10.27, then you need to checkout the right version.</p>
+
+<pre lang="shell"><code>cd lib/libuv
+git checkout v0.10.27
+</code></pre>
+
+<p>Then follow the README to build the libuv. Don't forget to setup i586 toolchain</p>
+
+<h2>
+<a name="build" class="anchor" href="#build"><span class="octicon octicon-link"></span></a>Build</h2>
+
+<ul>
+<li><p>Please build the iohub library. </p></li>
+<li><p>Set up i586 toolchain</p></li>
+<li><p>Build libmug.a</p></li>
+</ul><pre lang="shell"><code>make
+</code></pre>
+
+<ul>
+<li>Build test</li>
+</ul><pre lang="shell"><code>make test
+</code></pre>
+      </section>
+
+      <footer>
+        <span class="ribbon-outer">
+          <span class="ribbon-inner">
+            <p>this project by <a href="https://github.com/ilc-opensource">ilc-opensource</a> can be found on <a href="https://github.com/ilc-opensource/smart_mug">GitHub</a></p>
+          </span>
+          <span class="left-tail"></span>
+          <span class="right-tail"></span>
+        </span>
+        <p>Generated with <a href="http://pages.github.com">GitHub Pages</a> using Merlot</p>
+        <span class="octocat"></span>
+      </footer>
+
+    </div>
+
+    
+  </body>
+</html>
