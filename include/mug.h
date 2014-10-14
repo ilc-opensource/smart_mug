@@ -7,6 +7,8 @@
 
 //#define USE_IOHUB
 
+#define MUG_ENV "HOME"
+
 #define MAX_ROWS 12
 #define MAX_COLS 16
 #define MAX_COMPRESSED_ROWS MAX_ROWS
@@ -19,9 +21,14 @@
 #define SCREEN_HEIGHT 12
 #define TOUCH_WIDTH_SCALE  (TOUCH_WIDTH/SCREEN_WIDTH)
 #define TOUCH_HEIGHT_SCALE (TOUCH_HEIGHT/SCREEN_HEIGHT)
-#define MUG_ASSERT(cond, info, ...) \
+
+#define DISP_INFINITE -1
+
+#define MUG_ASSERT(cond, ...) \
   if(!(cond)) {  \
-    printf("%s:%d, %s\n", __FILE__, __LINE__, info); \
+    printf("\nFATAL ERROR: "); \
+    printf(__VA_ARGS__); \
+    printf("\n"); \
     assert(0);    \
   }
 
@@ -144,32 +151,39 @@ char* mug_create_raw_buffer();
 void  mug_free_raw_buffer(char *buf);
 void  mug_set_pixel_raw_color(char *raw, int col, int row, unsigned char color);
 
-// image
-int   mug_read_img(char *fname, char *buf);
+// raw image operation
+int   mug_read_img_to_raw(char *fname, char *buf);
 int   mug_disp_img(handle_t handle, char *name); 
 char* mug_read_img_N(char* names, int *num, int *size);
 int   mug_disp_img_N(handle_t handle, char *names, int interval);
+void  mug_init_font(char *font);
+void  mug_disp_text_marquee(handle_t handle, char *text, unsigned char * color, int interval, int repeat);
 
-//color
+//color translation
 unsigned char color_2_raw(unsigned char* color);
-unsigned char RGB_2_raw(unsigned char R,unsigned char G,unsigned B);
+unsigned char rgb_2_raw(unsigned char R,unsigned char G,unsigned B);
+
+typedef unsigned long cimg_handle_t;
 
 // cimg
-int   mug_read_cimg(void *cimg, char *buf);
-int   mug_disp_cimg(handle_t handle, void *cimg); 
-void  mug_draw_number_cimg(void *img, int col, int row, char *str, unsigned char* color);
+int   mug_cimg_to_raw(cimg_handle_t cimg, char *buf);
+int   mug_disp_cimg(handle_t handle, cimg_handle_t cimg); 
 void  mug_number_text_shape(int *width, int *height);
 
 // cimg handle
-typedef unsigned long cimg_handle_t;
-cimg_handle_t  mug_new_cimg_handle(int width, int height);
+
+cimg_handle_t  mug_new_cimg(int width, int height);
 cimg_handle_t  mug_new_canvas();
-cimg_handle_t  mug_load_cimg_handle(char* fname);
-int            mug_disp_cimg_handle(handle_t handle, cimg_handle_t cimg);
-void           mug_draw_number_cimg_handle(cimg_handle_t canvas, int col, int row, int num, mug_color_t color);
-void           mug_draw_cimg_handle(cimg_handle_t c, int col, int row, cimg_handle_t img);
-void           mug_destroy_cimg_handle(cimg_handle_t hdl);
-char*          mug_cimg_handle_to_raw(cimg_handle_t cimg);
+cimg_handle_t  mug_load_pic_cimg(char* fname);
+void           mug_draw_number_str_cimg(cimg_handle_t img, int col, int row, char *str, unsigned char* color);
+void           mug_draw_number_cimg(cimg_handle_t canvas, int col, int row, int num, mug_color_t color);
+void           mug_overlay_cimg(cimg_handle_t canvas, int col, int row, cimg_handle_t img);
+void           mug_destroy_cimg(cimg_handle_t hdl);
+char*          mug_cimg_get_raw(cimg_handle_t cimg);
+void           mug_draw_text_cimg(cimg_handle_t img, int col, int row, char *text, unsigned char* color, int height);
+void           mug_save_cimg(cimg_handle_t cimg, char *name);
+void           mug_disp_cimg_marquee(handle_t handle, cimg_handle_t img, int interval, int repeat);
+cimg_handle_t  mug_new_text_cimg(char* text, unsigned char* color);
 
 // motion sensor
 typedef struct _MPU6050 motion_data_t;
@@ -206,6 +220,11 @@ void      mug_touch_event_on(handle_t handle, touch_event_t event, touch_event_c
 void      mug_run_touch_thread(handle_t handle);
 void      mug_stop_touch_thread(handle_t handle);
 void      mug_wait_for_touch_thread(handle_t handle);
+
+// configuration
+int         mug_query_config_int(const char *key);
+double      mug_query_config_double(const char *key);
+const char* mug_query_config_string(const char *key);
 
 // utils
 char*  get_proc_dir();

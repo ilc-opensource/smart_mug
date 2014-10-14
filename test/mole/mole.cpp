@@ -146,7 +146,7 @@ void disp_canvas()
 #else
 void disp_canvas()
 {
-  mug_disp_cimg(disp_handle, &canvas); 
+  mug_disp_cimg(disp_handle, (cimg_handle_t)&canvas); 
 }
 #endif
 
@@ -217,10 +217,10 @@ void show_result()
 
   char temp[4];
   sprintf(temp, "%02d", score.touched);
-  mug_draw_number_cimg(&canvas, 0, 0, temp, red);
+  mug_draw_number_str_cimg((cimg_handle_t)&canvas, 0, 0, temp, red);
 
   sprintf(temp, "%02d", score.all);
-  mug_draw_number_cimg(&canvas, width * 2 , 0, temp, green);
+  mug_draw_number_str_cimg((cimg_handle_t)&canvas, width * 2 , 0, temp, green);
 
   disp_canvas();
 }
@@ -281,7 +281,7 @@ void init()
 
 void finish()
 {
-  mug_stop_touch_thread(touch_handle);
+  //mug_stop_touch_thread(touch_handle);
   pthread_mutex_destroy(&mutex);
 }
 

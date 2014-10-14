@@ -3,6 +3,7 @@
   "package": "com.intel.smart_mug.temprature",
   "version": "0.0.1",
   "icon"   : "icon.bmp",
+  "iconJSON": "media.json",
   "start"  : "app.js",
   "description": "display temperature of board"
 }

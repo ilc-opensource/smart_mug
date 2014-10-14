@@ -12,15 +12,9 @@
 #include <io.h>
 #include <mug.h>
 
-#if FOCALTECH
+
 #define TP_DEV_PATH         "/dev/input/event1"
 #define MPU_DEV_PATH        "/sys/class/hwmon/hwmon7/device/data"
-#elif CYPRESS
-#define TP_DEV_PATH         "/dev/input/event2"
-#define MPU_DEV_PATH        "/sys/bus/i2c/drivers/mpu60450/6-0068/hwmon/hwmon6/device/data"
-#else
-"err: must specify tp type"
-#endif
 
 handle_t dev_open(device_t type)
 {

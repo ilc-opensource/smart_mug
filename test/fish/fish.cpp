@@ -200,7 +200,7 @@ void resize_fish(fish_t *f)
 
 void disp_canvas()
 {
-  mug_disp_cimg(disp_handle, &canvas);
+  mug_disp_cimg(disp_handle, (cimg_handle_t)&canvas);
 }
 
 void on_motion(int ax, int ay, int az, int gx, int gy, int gz)

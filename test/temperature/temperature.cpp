@@ -56,7 +56,7 @@ void draw_temp(int t)
 
   canvas.draw_text(0, 0, temp, cyan, black);
 
-  mug_disp_cimg(disp_handle, &canvas);
+  mug_disp_cimg(disp_handle, (cimg_handle_t)&canvas);
 }
 
 #endif

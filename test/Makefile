@@ -1,6 +1,6 @@
 PACKS=fish temperature motion get_ip touch_trace mole
 
-TESTS= $(PACKS) show_raw show_raw_N animation show_image touch image_to_raw stop_mcu_flush
+TESTS= $(PACKS) show_raw show_raw_N animation show_image touch image_to_raw stop_mcu_flush text
 
 PACK_BIN=app_packs.tgz
 
@@ -12,6 +12,6 @@ clean:
 	rm -f $(PACK_BIN) 
 
 pack:
-	tar -czvf $(PACK_BIN) $(PACKS)
+	tar --exclude *.tgz --exclude build --exclude *.cpp --exclude *.h --exclude Makefile -czvf $(PACK_BIN) $(PACKS)
 
 .PHONY: pack

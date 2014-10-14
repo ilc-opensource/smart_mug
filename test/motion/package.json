@@ -3,6 +3,7 @@
   "package": "com.intel.smart_mug.motion",
   "version": "0.0.1",
   "icon"   : "icon.bmp",
+  "iconJSON": "media.json",
   "start"  : "app.js",
   "description": "display value of accelermeter and gyro with colored bar. From left to right, they are: ax, ay, az, gx, gy, gz"
 }

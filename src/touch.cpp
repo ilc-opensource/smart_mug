@@ -14,7 +14,7 @@
 
 #include <iohub_client.h>
 #include <mug.h>
-
+#include <config.h>
 #ifndef USE_IOHUB
 #include <io.h>
 #endif
@@ -63,6 +63,8 @@ typedef list<touch_point_t>            touch_trace_t;
 typedef vector<touch_trace_t*>         touch_track_t;
 typedef map<gesture_t, gesture_cb_t>   gesture_to_cb_t;
 typedef map<touch_event_t, touch_event_cb_t> touch_event_to_cb_t;
+
+static bool reverse_y = false;
 
 touch_track_t touch_tracks(TOUCH_TRACE_NUM);
 
@@ -391,8 +393,10 @@ void normalize_point(touch_point_t *point)
   int oldy = point->y; 
   
   point->x = TOUCH_WIDTH  - oldy; 
-  //point->y = TOUCH_HEIGHT - oldx;
-  point->y = oldx;
+  if(reverse_y)
+    point->y = TOUCH_HEIGHT - oldx;
+  else
+    point->y = oldx;
 }
 
 void parse_event(input_event *event)
@@ -696,7 +700,7 @@ static handle_t scan_devices(void)
 
 handle_t mug_touch_init() 
 {
-
+  reverse_y = mug_query_config_int(CONFIG_REVERSE_Y);
 #if 0  
   handle_t handle = mug_init(DEVICE_TP);
 #else

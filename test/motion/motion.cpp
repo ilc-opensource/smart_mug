@@ -55,7 +55,7 @@ void on_motion(int ax, int ay, int az, int gx, int gy, int gz)
   draw_bar(4, gy, magenta);	
   draw_bar(5, gz, cyan);	  
 
-  mug_disp_cimg(disp_handle, &canvas);
+  mug_disp_cimg(disp_handle, (cimg_handle_t)&canvas);
 }
 
 void on_angle(float angle_x, float angle_y, float angle_z)

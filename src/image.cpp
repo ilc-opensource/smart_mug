@@ -1,4 +1,6 @@
 #include <mug.h>
+#include <config.h>
+#include <utf8.h>
 
 #include <list>
 #include <vector>
@@ -10,6 +12,11 @@ using namespace std;
 #include <CImg.h>
 using namespace cimg_library;
 
+typedef CImg<unsigned char> cimg_t;
+typedef vector<cimg_t> cimg_vec_t;
+
+
+#include <locale.h>
 #include "ft2build.h"
 #include FT_FREETYPE_H
 FT_Library ftlib;
@@ -26,7 +33,9 @@ unsigned char magenta[]= {255, 0,   255};
 unsigned char white[]  = {255, 255, 255};
 unsigned char black[]  = {0,   0,   0  };
 
-#define LATCH 128
+char *disp_font = NULL;
+
+#define LATCH 80
 
 #define MAX_FILE_NAME 512
 
@@ -45,7 +54,7 @@ char *get_proc_dir() {
   return buf;
 }
 
-unsigned char RGB_2_raw(unsigned char R, unsigned char G, unsigned B)
+unsigned char rgb_2_raw(unsigned char R, unsigned char G, unsigned B)
 {
   unsigned char raw = 0;
 
@@ -62,12 +71,12 @@ unsigned char RGB_2_raw(unsigned char R, unsigned char G, unsigned B)
 }
 
 unsigned char color_2_raw(unsigned char *color) {
-  return RGB_2_raw(color[0], color[1], color[2]);
+  return rgb_2_raw(color[0], color[1], color[2]);
 }
 
-int mug_read_cimg(void* cimg, char *buf)
+int mug_cimg_to_raw(cimg_handle_t cimg, char *buf)
 {
-  CImg<unsigned char> src = *(CImg<unsigned char>*)cimg;
+  cimg_t src = *(cimg_t*)cimg;
   unsigned char *p =(unsigned char*) buf;
   int width = src.width();
   int height = src.height();
@@ -84,7 +93,7 @@ int mug_read_cimg(void* cimg, char *buf)
       G = (unsigned char)src(c, r, 0, 1);
       B = (unsigned char)src(c, r, 0, 2);
 
-      raw = RGB_2_raw(R, G, B);
+      raw = rgb_2_raw(R, G, B);
      
       if( c % 2) {
         (*p) &= 0xf; 
@@ -100,10 +109,10 @@ int mug_read_cimg(void* cimg, char *buf)
   return IMG_OK;
 }
 
-int mug_read_img(char *fname, char *buf) 
+int mug_read_img_to_raw(char *fname, char *buf) 
 {
-  CImg<unsigned char> src(fname);
-  return mug_read_cimg(&src, buf);
+  cimg_t src(fname);
+  return mug_cimg_to_raw((cimg_handle_t)&src, buf);
 }
 
 char* mug_create_raw_buffer() 
@@ -134,7 +143,7 @@ int mug_disp_img(handle_t handle, char* name)
   if(!buf)
     return IMG_ERROR;
 
-  ret = mug_read_img(name, buf);
+  ret = mug_read_img_to_raw(name, buf);
   if(ret != IMG_OK)
     return ret;
 
@@ -145,7 +154,7 @@ int mug_disp_img(handle_t handle, char* name)
   return IMG_OK;
 }
 
-int mug_disp_cimg(handle_t handle, void *cimg) 
+int mug_disp_cimg(handle_t handle, cimg_handle_t cimg) 
 {
   int ret;
   char *buf;
@@ -154,7 +163,7 @@ int mug_disp_cimg(handle_t handle, void *cimg)
   if(!buf)
     return IMG_ERROR;
 
-  ret = mug_read_cimg(cimg, buf);
+  ret = mug_cimg_to_raw(cimg, buf);
   if(ret != IMG_OK)
     return ret;
 
@@ -202,7 +211,7 @@ char* mug_read_img_N(char* names, int *num, int *size)
       itr != parsed.end();
       itr++) {
     printf("+%s\n", *itr);
-    err = mug_read_img(*itr, p);
+    err = mug_read_img_to_raw(*itr, p);
     if(err != IMG_OK) {
       printf("read image %s error\n", *itr);
       return 0;
@@ -222,7 +231,7 @@ int mug_disp_img_N(handle_t handle, char *names, int interval)
   mug_disp_raw_N(handle, raw, num, interval); 
 }
 
-void normalize_color(CImg<unsigned char> &img)
+void normalize_color(cimg_t &img)
 {
   for(int r = 0; r < img.height(); r++) {
     for(int c = 0; c < img.width(); c++) {
@@ -238,7 +247,7 @@ void normalize_color(CImg<unsigned char> &img)
 }
 
 #define NUMBER_PIC_DIR "number_pic"
-vector< CImg<unsigned char> > numbers;
+cimg_vec_t numbers;
 
 void init_number_text(const char *path)
 {
@@ -250,13 +259,13 @@ void init_number_text(const char *path)
   
   for(int i = 0; i < 10; i++) {
     sprintf(temp, "%s/%s/%d.bmp", path, NUMBER_PIC_DIR, i);
-    CImg<unsigned char> img(temp);
+    cimg_t img(temp);
     normalize_color(img);
     numbers.push_back(img);
   }
 }
 
-void change_color(CImg<unsigned char> &img, unsigned char *color)
+void change_color(cimg_t &img, unsigned char *color)
 {
   for(int r = 0; r < img.height(); r++) {
     for(int c = 0; c < img.width(); c++) {
@@ -271,12 +280,12 @@ void change_color(CImg<unsigned char> &img, unsigned char *color)
   }
 }
 
-void draw_number(CImg<unsigned char> *pimg, int c, int r, char *str, unsigned char *color)
+void draw_number(cimg_t *pimg, int c, int r, char *str, unsigned char *color)
 {
   char *p = str;
   int next_c = c;
 
-  CImg<unsigned char> img;
+  cimg_t img;
 
   while('0' <= *p && *p <= '9') {
     img = numbers[*p - '0'];
@@ -289,7 +298,7 @@ void draw_number(CImg<unsigned char> *pimg, int c, int r, char *str, unsigned ch
   }
 }
 
-void resize(CImg<unsigned char> &img, int new_col, int new_row)
+void resize(cimg_t &img, int new_col, int new_row)
 {
   img.resize(new_col, new_row, -100);
 
@@ -297,13 +306,13 @@ void resize(CImg<unsigned char> &img, int new_col, int new_row)
 
 }
 
-void mug_draw_number_cimg(void *img, int col, int row, char *str, unsigned char* color)
+void mug_draw_number_str_cimg(cimg_handle_t img, int col, int row, char *str, unsigned char* color)
 {
   if(numbers.empty()) {
     init_number_text("./");
   }
 
-  draw_number((CImg<unsigned char> *)img, col, row, str, color);
+  draw_number((cimg_t *)img, col, row, str, color);
 }
 
 void mug_number_text_shape(int *width, int *height)
@@ -312,7 +321,7 @@ void mug_number_text_shape(int *width, int *height)
     init_number_text("./");
   }
 
-  CImg<unsigned char> img;
+  cimg_t img;
   img = numbers[0];
 
   *width = img.width() + 1;
@@ -362,55 +371,57 @@ unsigned char *get_color_data(mug_color_t color) {
   return val;
 }
 
-cimg_handle_t mug_new_cimg_handle(int width, int height)
+cimg_handle_t mug_new_cimg(int width, int height)
 {
-  CImg<unsigned char> *cimg = new CImg<unsigned char>(width, height, 1, 3, 0);
+  cimg_t *cimg = new cimg_t(width, height, 1, 3, 0);
   return (cimg_handle_t)cimg;
 }
 
 cimg_handle_t mug_new_canvas()
 {
-  return mug_new_cimg_handle(SCREEN_WIDTH, SCREEN_HEIGHT);
+  return mug_new_cimg(SCREEN_WIDTH, SCREEN_HEIGHT);
 }
 
-cimg_handle_t mug_load_cimg_handle(char* fname)
+cimg_handle_t mug_load_pic_cimg(char* fname)
 {
-  CImg<unsigned char> *cimg = new CImg<unsigned char>(fname);
+  cimg_t *cimg = new cimg_t(fname);
   return (cimg_handle_t)cimg;
 }
 
-int mug_disp_cimg_handle(handle_t handle, cimg_handle_t cimg)
-{
-  return mug_disp_cimg(handle,(void*)cimg);
-}
-
-void mug_draw_number_cimg_handle(cimg_handle_t canvas, int col, int row, int num, mug_color_t color)
+void mug_draw_number_cimg(cimg_handle_t canvas, int col, int row, int num, mug_color_t color)
 {
   char temp[64];
   memset(temp, 0, sizeof(temp));
   sprintf(temp, "%d", num);
-  return mug_draw_number_cimg((void*)canvas, col, row, temp, get_color_data(color));
+  return mug_draw_number_str_cimg(canvas, col, row, temp, get_color_data(color));
 }
 
-void mug_draw_cimg_handle(cimg_handle_t c, int col, int row, cimg_handle_t img)
+void mug_overlay_cimg(cimg_handle_t c, int col, int row, cimg_handle_t img)
 {
-  CImg<unsigned char> *canvas = (CImg<unsigned char>*)c;
-  CImg<unsigned char> *cimg = (CImg<unsigned char>*)img;
+  cimg_t *canvas = (cimg_t*)c;
+  cimg_t *cimg = (cimg_t*)img;
 
   canvas->draw_image(col, row, 0, 0, *cimg);
 }
 
-void mug_destroy_cimg_handle(cimg_handle_t hdl)
+void mug_destroy_cimg(cimg_handle_t hdl)
 {
-  delete((CImg<unsigned char>*)hdl);
+  delete((cimg_t*)hdl);
 }
 
-char* mug_cimg_handle_to_raw(cimg_handle_t cimg)
+char* mug_cimg_get_raw(cimg_handle_t cimg)
 {
   char *raw = mug_create_raw_buffer();
-  mug_read_cimg((void*)cimg, raw);
+  mug_cimg_to_raw(cimg, raw);
   return raw;
 }
+
+void mug_save_cimg(cimg_handle_t cimg, char *name)
+{
+  cimg_t *img = (cimg_t*)cimg;
+  img->save(name);
+}
+
 
 /*
  libtruetype for cimg from https://github.com/tttzof351/cimg-and-freetype
@@ -446,7 +457,7 @@ void closeFreetype(
 
 void drawGlyph(
   FT_GlyphSlot& glyphSlot,
-  CImg<unsigned char>& image,
+  cimg_t& image,
   const int& shiftX,
   const int& shiftY,
   unsigned char fontColor[] = NULL
@@ -474,15 +485,23 @@ void drawGlyph(
 
 void drawText(
   FT_Face& face,
-  CImg<unsigned char>& image,
+  cimg_t& image,
   const int& heightText,
   const std::wstring& text,
   const int& leftTopX,
   const int& leftTopY,
+  int &width,
+  int &height,
   unsigned char fontColor[] = NULL,
   const int separeteGlyphWidth = 1
 ){
-  
+
+  if(disp_font == NULL)
+    mug_init_font(NULL);
+
+  width = 0;
+  height = 0;
+
   FT_Set_Pixel_Sizes(face, 0, heightText);
   FT_GlyphSlot glyphSlot = face->glyph;  
   
@@ -492,7 +511,8 @@ void drawText(
     shiftY = leftTopY;
  
     bool isSpace = false;
-    FT_ULong symbol = text.at(numberSymbol);
+    //FT_ULong symbol = text.at(numberSymbol);
+    FT_ULong symbol = text[numberSymbol];
     if (symbol == ' ') {
       symbol = 'a';
       isSpace = true;
@@ -502,21 +522,133 @@ void drawText(
        throw "Error, glyph not load!! \n";
     }
 
-    float shiftFactor = glyphSlot->bitmap.rows - glyphSlot->bitmap_top; 
-    shiftY += shiftFactor;
-    shiftY +=  (heightText > glyphSlot->bitmap.rows) ? heightText - glyphSlot->bitmap.rows : 0;
-    
+    shiftY = heightText - glyphSlot->bitmap.rows;
+    if(shiftY < 0)
+      shiftY = 0;
+   
     if(!isSpace){
-      drawGlyph(glyphSlot, image, shiftX, shiftY, fontColor);
+      drawGlyph(glyphSlot, image, shiftX, shiftY, fontColor);      
     }
     shiftX += glyphSlot->bitmap.width + separeteGlyphWidth;
+
+    // update string img width/height
+    if(height < shiftY + glyphSlot->bitmap.rows) {
+      height = shiftY + glyphSlot->bitmap.rows;
+    }
+    width = shiftX;
   }
 }
 
-void mug_init_font(handle_t handle, char *font)
+wchar_t* get_wchar(char* c)
 {
-  if(font == NULL) 
-    font = (char*)DEFAULT_FONT;
+  size_t cSize = strlen(c)+1;
+  wchar_t* wc = new wchar_t[cSize];
+  int ret = mbstowcs (wc, c, cSize);
 
-  initFreetype(ftlib, face, font);
+  MUG_ASSERT(ret >= 0, "can not translate string to unicode");
+
+  return wc;
+}
+
+void mug_split_cimg(cimg_handle_t img, int step, cimg_vec_t &slices)
+{
+  cimg_t *cimg = (cimg_t*)img;
+  
+  int width = cimg->width();
+  int times = (width + step - 1) / step;
+  int real_height = cimg->height() < SCREEN_HEIGHT ? cimg->height() : SCREEN_HEIGHT;
+
+  int start, end;
+
+  for(int i = 0; i < times; i++) {
+    start = i * step;
+    end = (start + SCREEN_WIDTH - 1);
+    if (end >= width - 1)
+      end = width - 1;
+
+    cimg_t crop = cimg->get_crop(start, 0, end, real_height - 1);
+    cimg_t canvas = cimg_t(SCREEN_WIDTH, SCREEN_HEIGHT, 1, 3, 0);
+    canvas.draw_image(0, 0, 0, 0, crop);
+    slices.push_back(canvas);
+  }
+}
+
+void mug_disp_cimg_marquee(handle_t handle, cimg_handle_t img, int interval, int repeat)
+{
+  cimg_vec_t slices;
+
+  cimg_t *cimg = (cimg_t*)img;
+  //enlarge the original image
+  cimg_t large(cimg->width() + SCREEN_WIDTH, cimg->height(), 1, 3, 0);
+  large.draw_image(SCREEN_WIDTH, 0, 0, *cimg);
+  
+  cimg = &large;
+  mug_split_cimg((cimg_handle_t)cimg, 2, slices);
+
+  int num = slices.size(); 
+  char *buf = (char*)malloc(COMPRESSED_SIZE * num);
+  char *p = buf;
+
+  for(int i = 0; i < num; i++) {
+    mug_cimg_to_raw((cimg_handle_t)&slices[i], p);
+    p += COMPRESSED_SIZE;
+  }
+
+  int cnt = 0;
+
+
+  while(repeat < 0 || cnt < repeat) {
+    p = buf;
+    for(int i = 0; i < num; i++) {
+      mug_disp_raw(handle, p);
+      usleep(interval * 1000);
+      p += COMPRESSED_SIZE ;
+    }
+    //mug_disp_raw_N(handle, buf, num, interval);
+    cnt++;
+  }
+}
+
+void mug_disp_text_marquee(handle_t handle, char *text, unsigned char * color, int interval, int repeat)
+{
+  cimg_handle_t img = mug_new_text_cimg(text, color);
+  mug_disp_cimg_marquee(handle, img, interval, repeat);
+}
+
+void mug_draw_text_cimg(cimg_handle_t img, 
+                       int col, int row, 
+                       char* text, unsigned char* color, int height, 
+                       int *str_width, int *str_height)
+{
+  wchar_t *wc = utf8_to_unicode_wchar(text);
+  std::wstring str = wc;
+  free(wc);
+
+  drawText(face, *(cimg_t*)img, height, str, col, row, *str_width, *str_height, color);
+}
+
+cimg_handle_t mug_new_text_cimg(char* text, unsigned char* color)
+{
+  wchar_t *wc = utf8_to_unicode_wchar(text);
+  std::wstring str = wc;
+  free(wc);
+
+  int height = SCREEN_HEIGHT;
+
+  cimg_t *cimg = new cimg_t(str.length() * height * 2, height * 2, 1, 3, 0);
+
+  int str_width, str_height;
+
+  mug_draw_text_cimg((cimg_handle_t)cimg, 0, 0, text, color, height, &str_width, &str_height);  
+  cimg->crop(0, 0, str_width - 1, SCREEN_HEIGHT - 1);
+  return (cimg_handle_t)cimg;
+}
+
+void mug_init_font(char *font)
+{
+  if(font == NULL) {
+    disp_font = (char*)mug_query_config_string(CONFIG_FONT);
+  }
+
+  initFreetype(ftlib, face, disp_font);
 }

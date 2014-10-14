@@ -1,8 +1,9 @@
 {
-  "name"   : "get_ip",
+  "name": "get_ip",
   "package": "com.intel.smart_mug.get_ip",
   "version": "0.0.1",
   "icon"   : "icon.bmp",
+  "iconJSON": "media.json",
   "start"  : "app.js",
   "description": "get ip address of wlan0"
 }

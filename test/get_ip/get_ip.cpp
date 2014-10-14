@@ -7,84 +7,11 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
-#include "CImg.h"
-using namespace cimg_library;
 
 #include <string>
 using namespace std;
 
 #include <mug.h>
-
-#define INTERVAL 1000
-
-CImg<unsigned char> canvas(SCREEN_WIDTH, SCREEN_HEIGHT, 1, 3, 0);
-handle_t disp_handle;
-
-void disp_canvas()
-{
-  mug_disp_cimg(disp_handle, &canvas); 
-}
-
-void clear_canvas()
-{
-  canvas.draw_rectangle(0, 0, 0,
-                        SCREEN_WIDTH, SCREEN_HEIGHT, 0,
-                        black);
-
-}
-
-char** split_ip(char *ip_str)
-{
-  char **ip_split;
-  char *p = ip_str;
-
-  ip_split = (char**) malloc(4 * sizeof(char*));
-
-  int cnt = 0;
-
-  ip_split[cnt] = p;
-
-  while(*p != '\0') {
-    if(*p == '.') {
-      *p = '\0';
-      cnt++;
-      ip_split[cnt] = p + 1;
-    }
-    p++;
-  }
-
-  for(int i = 0; i < 4; i++) {
-    printf("====> %s\n", ip_split[i]);
-  }
-  
-  return ip_split; 
-}
-
-void show_ip(char** splits)
-{
-
-  int width, height;
-  mug_number_text_shape(&width, &height);
-
-  for(int i = 0; i < 4; i++) {
-    clear_canvas();
-    mug_draw_number_cimg(&canvas, 0, 0, splits[i], cyan);
-    disp_canvas();
-    usleep(INTERVAL * 1000);    
-  }
-}
-
-void show_no_ip()
-{
-  clear_canvas();
-  canvas.draw_text(0, 0, "----", red, black);
-  disp_canvas();
-}
-
-void init()
-{
-  disp_handle = mug_disp_init();
-}
 
 char* get_ip(char *if_name)
 {
@@ -127,24 +54,22 @@ char* get_ip(char *if_name)
 
 int main(int argc, char **argv)
 {
+  handle_t disp_handle = mug_disp_init();
+
   char *if_name = (char*)"wlan0";
+
   if(argc == 2) {
     if_name = argv[1];
   }
-
-  init();
 
   char *ip_str = get_ip(if_name);
 
   printf(">>>> %s\n", ip_str);
 
-  char **split_str;
-
   if(ip_str != NULL) {
-    split_str = split_ip(ip_str);
-    show_ip(split_str);
+    mug_disp_text_marquee(disp_handle, ip_str, cyan, 150, DISP_INFINITE);
   } else {
-    show_no_ip();    
+    mug_disp_text_marquee(disp_handle, "no ip", red, 100, DISP_INFINITE);
   }
 
 }

@@ -79,9 +79,13 @@ int main()
   raw_buf = mug_create_raw_buffer();
   clear_canvas();
   canvas.draw_text(0, 0, "ok", cyan, black);
-  mug_disp_cimg(disp_handle, &canvas);
+  mug_disp_cimg(disp_handle, (cimg_handle_t)&canvas);
   usleep(1000 * 1000);
-  
+  canvas.draw_rectangle(0, 0, 0,
+                        SCREEN_WIDTH, SCREEN_HEIGHT, 0,
+                        black);
+  mug_disp_cimg(disp_handle, (cimg_handle_t)&canvas);
+
   mug_disp_raw(disp_handle, raw_buf);
   mug_touch_on(touch_handle, on_touch);
   mug_touch_event_on(touch_handle, TOUCH_UP, on_touch_event);
