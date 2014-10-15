@@ -1,24 +1,60 @@
 #include <mug.h>
 #include <config.h>
 #include <utf8.h>
+#include <time.h>
 
 #include <list>
 #include <vector>
 #include <string>
-
 using namespace std;
+
+#include <pthread.h>
+#include <semaphore.h>
+#include <errno.h>
 
 #define cimg_display 0
 #include <CImg.h>
 using namespace cimg_library;
 
-typedef CImg<unsigned char> cimg_t;
-typedef vector<cimg_t> cimg_vec_t;
-
 
 #include <locale.h>
 #include "ft2build.h"
 #include FT_FREETYPE_H
+
+// pthread variables
+static pthread_mutex_t img_mutex;
+static pthread_mutex_t marquee_mutex;
+
+static pthread_cond_t new_disp_cond;
+
+static pthread_t text_disp_thread_hdl = (pthread_t)NULL;
+
+static sem_t new_disp_sem;
+
+#define LOCK_(t)  pthread_mutex_lock(t)
+#define UNLOCK_(t) pthread_mutex_unlock(t)
+
+#define ATOM_INC(v) __sync_fetch_and_add(v, 1)
+#define ATOM_DEC(v) __sync_fetch_and_sub(v, 1)
+#define ATOM_VAL(v) __sync_fetch_and_add(v, 0)
+
+unsigned int force_stop_disp = 0;
+
+typedef struct disp_img_args_
+{
+  handle_t      handle;
+  cimg_handle_t img;
+  int           interval;
+  int           repeat;
+} disp_img_args_t;
+
+static disp_img_args_t thread_arg;
+
+// cimg variables
+typedef CImg<unsigned char> cimg_t;
+typedef vector<cimg_t> cimg_vec_t;
+
+// freetruetype variabls
 FT_Library ftlib;
 FT_Face face;
 
@@ -54,6 +90,39 @@ char *get_proc_dir() {
   return buf;
 }
 
+unsigned char * color_to_rgb(const char *color)
+{
+  string str(color);
+
+  if(str == "red" || str == "RED")
+    return red;
+
+  if(str == "green" || str == "GREEN")
+    return green;
+  
+  if(str == "blue" || str == "BLUE")
+    return blue;
+
+  if(str == "yellow" || str == "YELLOW")
+    return yellow;
+
+  if(str == "cyan" || str == "CYAN")
+    return cyan;
+  
+  if(str == "magenta" || str == "MAGENTA")
+    return magenta;
+
+  if(str == "white" || str == "WHITE")
+    return white;
+  
+  if(str == "black" || str == "BLACK")
+    return black;
+
+  MUG_ASSERT(false, "unkown color: %s\n", color);
+
+  return NULL;
+}
+
 unsigned char rgb_2_raw(unsigned char R, unsigned char G, unsigned B)
 {
   unsigned char raw = 0;
@@ -70,8 +139,9 @@ unsigned char rgb_2_raw(unsigned char R, unsigned char G, unsigned B)
   return raw; 
 }
 
-unsigned char color_2_raw(unsigned char *color) {
-  return rgb_2_raw(color[0], color[1], color[2]);
+unsigned char color_2_raw(const char *color) {
+  unsigned char* data = color_to_rgb(color);
+  return rgb_2_raw(data[0], data[1], data[2]);
 }
 
 int mug_cimg_to_raw(cimg_handle_t cimg, char *buf)
@@ -210,7 +280,6 @@ char* mug_read_img_N(char* names, int *num, int *size)
   for(list<char*>::iterator itr = parsed.begin();
       itr != parsed.end();
       itr++) {
-    printf("+%s\n", *itr);
     err = mug_read_img_to_raw(*itr, p);
     if(err != IMG_OK) {
       printf("read image %s error\n", *itr);
@@ -280,17 +349,19 @@ void change_color(cimg_t &img, unsigned char *color)
   }
 }
 
-void draw_number(cimg_t *pimg, int c, int r, char *str, unsigned char *color)
+void draw_number(cimg_t *pimg, int col, int row, const char *str, const char *c)
 {
-  char *p = str;
-  int next_c = c;
+  unsigned char *color = color_to_rgb(c);
+
+  char *p = (char*)str;
+  int next_c = col;
 
   cimg_t img;
 
   while('0' <= *p && *p <= '9') {
     img = numbers[*p - '0'];
     change_color(img, color);
-    pimg->draw_image(next_c, r, 0, 0,
+    pimg->draw_image(next_c, row, 0, 0,
                       img);
     next_c += img.width();
     next_c++;
@@ -301,18 +372,14 @@ void draw_number(cimg_t *pimg, int c, int r, char *str, unsigned char *color)
 void resize(cimg_t &img, int new_col, int new_row)
 {
   img.resize(new_col, new_row, -100);
-
-  printf("img -> %d x %d\n", img.width(), img.height());
-
 }
 
-void mug_draw_number_str_cimg(cimg_handle_t img, int col, int row, char *str, unsigned char* color)
+void mug_draw_number_str_cimg(cimg_handle_t img, int col, int row, const char *str, const char* c)
 {
   if(numbers.empty()) {
     init_number_text("./");
-  }
-
-  draw_number((cimg_t *)img, col, row, str, color);
+  }  
+  draw_number((cimg_t *)img, col, row, str, c);
 }
 
 void mug_number_text_shape(int *width, int *height)
@@ -326,49 +393,6 @@ void mug_number_text_shape(int *width, int *height)
 
   *width = img.width() + 1;
   *height = img.height();
-}
-
-unsigned char *get_color_data(mug_color_t color) {
-  unsigned char *val;
-
-  switch(color) {
-  case RED:
-    val = red;
-    break;
-
-  case GREEN:
-    val = green;
-    break;
-
-  case BLUE:
-    val = blue;
-    break;
-
-  case YELLOW:
-    val = yellow;
-    break;
-
-  case CYAN:
-    val = cyan;
-    break;
-
-  case MAGENTA:
-    val = magenta;
-    break;
-
-  case WHITE:
-    val = white;
-    break;
-
-  case BLACK:
-    val = black;
-    break;
-
-  default:
-    val = NULL;
-  }
-
-  return val;
 }
 
 cimg_handle_t mug_new_cimg(int width, int height)
@@ -386,14 +410,6 @@ cimg_handle_t mug_load_pic_cimg(char* fname)
 {
   cimg_t *cimg = new cimg_t(fname);
   return (cimg_handle_t)cimg;
-}
-
-void mug_draw_number_cimg(cimg_handle_t canvas, int col, int row, int num, mug_color_t color)
-{
-  char temp[64];
-  memset(temp, 0, sizeof(temp));
-  sprintf(temp, "%d", num);
-  return mug_draw_number_str_cimg(canvas, col, row, temp, get_color_data(color));
 }
 
 void mug_overlay_cimg(cimg_handle_t c, int col, int row, cimg_handle_t img)
@@ -496,9 +512,6 @@ void drawText(
   const int separeteGlyphWidth = 1
 ){
 
-  if(disp_font == NULL)
-    mug_init_font(NULL);
-
   width = 0;
   height = 0;
 
@@ -573,17 +586,77 @@ void mug_split_cimg(cimg_handle_t img, int step, cimg_vec_t &slices)
   }
 }
 
+bool check_and_sleep(int usec)
+{
+  if(text_disp_thread_hdl && __sync_fetch_and_add(&force_stop_disp, 0)) {
+    return true;
+  } else {
+    usleep(usec * 1000);
+  }
+  return false;
+
+}
+
+void* thread_entry(void *param)
+{
+  disp_img_args_t arg_copy;
+
+  while(true) {
+    // waiting for new request
+
+    sem_wait(&new_disp_sem);
+
+    LOCK_(&img_mutex);
+    arg_copy = thread_arg;
+    UNLOCK_(&img_mutex);
+
+    mug_disp_cimg_marquee(arg_copy.handle, arg_copy.img, arg_copy.interval, arg_copy.repeat);
+  }
+
+  pthread_exit(NULL);
+}
+
+void stop_marquee()
+{
+  __sync_fetch_and_or(&force_stop_disp, 1);
+
+}
+
+void reset_marquee()
+{
+  __sync_fetch_and_and(&force_stop_disp, 0);
+}
+
+void notify_new_disp()
+{
+  int val;
+  int ret = sem_getvalue(&new_disp_sem, &val);
+
+  MUG_ASSERT(!ret, "internal error\n");
+
+  if(val == 0)
+    sem_post(&new_disp_sem);
+}
+
 void mug_disp_cimg_marquee(handle_t handle, cimg_handle_t img, int interval, int repeat)
 {
   cimg_vec_t slices;
 
   cimg_t *cimg = (cimg_t*)img;
   //enlarge the original image
-  cimg_t large(cimg->width() + SCREEN_WIDTH, cimg->height(), 1, 3, 0);
-  large.draw_image(SCREEN_WIDTH, 0, 0, *cimg);
-  
+  int ext = SCREEN_WIDTH, step = 2, offset = ext;
+
+  if(cimg->width() < SCREEN_WIDTH) {
+    ext = SCREEN_WIDTH - cimg->width();
+    step = SCREEN_WIDTH;
+    offset = 0;
+  } 
+  cimg_t large(cimg->width() + ext, cimg->height(), 1, 3, 0);
+  large.draw_image(offset, 0, 0, *cimg);
+
   cimg = &large;
-  mug_split_cimg((cimg_handle_t)cimg, 2, slices);
+
+  mug_split_cimg((cimg_handle_t)cimg, step, slices);
 
   int num = slices.size(); 
   char *buf = (char*)malloc(COMPRESSED_SIZE * num);
@@ -596,38 +669,70 @@ void mug_disp_cimg_marquee(handle_t handle, cimg_handle_t img, int interval, int
 
   int cnt = 0;
 
+  LOCK_(&marquee_mutex);
 
+  reset_marquee();
   while(repeat < 0 || cnt < repeat) {
     p = buf;
     for(int i = 0; i < num; i++) {
+
       mug_disp_raw(handle, p);
-      usleep(interval * 1000);
+      if(check_and_sleep(interval)) {
+        goto end;
+      }
       p += COMPRESSED_SIZE ;
     }
     //mug_disp_raw_N(handle, buf, num, interval);
     cnt++;
   }
+end:
+  UNLOCK_(&marquee_mutex);
 }
 
-void mug_disp_text_marquee(handle_t handle, char *text, unsigned char * color, int interval, int repeat)
+
+void mug_disp_cimg_marquee_async(handle_t handle, cimg_handle_t img, int interval, int repeat)
 {
+  stop_marquee();
+
+  LOCK_(&img_mutex);
+  thread_arg.handle = handle;
+  thread_arg.img = img;
+  thread_arg.interval = interval;
+  thread_arg.repeat = repeat;
+  notify_new_disp();
+  UNLOCK_(&img_mutex);
+}
+
+void mug_disp_text_marquee(handle_t handle, const char *text, const char * color, int interval, int repeat)
+{
+  stop_marquee();
   cimg_handle_t img = mug_new_text_cimg(text, color);
   mug_disp_cimg_marquee(handle, img, interval, repeat);
+  mug_destroy_cimg(img);
+}
+
+void mug_disp_text_marquee_async(handle_t handle, const char *text, const char * color, int interval, int repeat)
+{
+  // TODO: remove potential memory leak
+  cimg_handle_t img = mug_new_text_cimg(text, color);
+  mug_disp_cimg_marquee_async(handle, img, interval, repeat);
 }
 
 void mug_draw_text_cimg(cimg_handle_t img, 
                        int col, int row, 
-                       char* text, unsigned char* color, int height, 
+                       const char* text, const char* color, int height, 
                        int *str_width, int *str_height)
 {
   wchar_t *wc = utf8_to_unicode_wchar(text);
   std::wstring str = wc;
   free(wc);
+  
+  unsigned char *rgb = color_to_rgb(color);
 
-  drawText(face, *(cimg_t*)img, height, str, col, row, *str_width, *str_height, color);
+  drawText(face, *(cimg_t*)img, height, str, col, row, *str_width, *str_height, rgb);
 }
 
-cimg_handle_t mug_new_text_cimg(char* text, unsigned char* color)
+cimg_handle_t mug_new_text_cimg(const char* text, const char* color)
 {
   wchar_t *wc = utf8_to_unicode_wchar(text);
   std::wstring str = wc;
@@ -644,11 +749,30 @@ cimg_handle_t mug_new_text_cimg(char* text, unsigned char* color)
   return (cimg_handle_t)cimg;
 }
 
+void img_env_init()
+{
+
+  pthread_mutex_init(&img_mutex, NULL);
+  pthread_mutex_init(&marquee_mutex, NULL);
+
+  pthread_cond_init(&new_disp_cond, NULL);
+  
+  sem_init(&new_disp_sem, 0, 0);
+
+  int err = pthread_create(&text_disp_thread_hdl, NULL, thread_entry, NULL);
+  MUG_ASSERT(!err, "can not start marquee thread\n");  
+
+}
+
 void mug_init_font(char *font)
 {
-  if(font == NULL) {
-    disp_font = (char*)mug_query_config_string(CONFIG_FONT);
+  if(!disp_font) {
+    img_env_init();
   }
 
-  initFreetype(ftlib, face, disp_font);
+  if(font == NULL) {
+    disp_font = (char*)mug_query_config_string(CONFIG_FONT);
+    initFreetype(ftlib, face, disp_font);
+  }
+
 }

@@ -173,7 +173,7 @@ void run_motion_timer(uv_timer_t *req, int status)
   motion_data_t *data = &(motion->data);
   motion->error = mug_read_motion(motion->handle, &(motion->data));  
 
-  if(motion->error == ERROR_NONE && status == NULL) {
+  if(motion->error == ERROR_NONE && status == 0) {
 
     if(motion->cb != NULL) {
       (motion->cb)(data->ax, data->ay, data->az, data->gx, data->gy, data->gz);

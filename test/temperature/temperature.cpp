@@ -22,30 +22,7 @@ void clear_canvas()
                         black);
 
 }
-#if 0
-void draw_temp(int t)
-{
-  clear_canvas();
-  int width, height;
-  mug_number_text_shape(&width, &height);
 
-  char buf[4];
-
-  sprintf(buf, "%d", t);
-
-  unsigned char * color;
-
-  if( t < WARM)
-    color = cyan;
-  else if(t < HOT)
-    color = yellow;
-  else
-    color = red; 
-
-  mug_draw_number_cimg(&canvas, 0, 0, buf, color);
-  mug_disp_cimg(disp_handle, &canvas);
-}
-#else
 void draw_temp(int t)
 {
   clear_canvas();
@@ -59,7 +36,6 @@ void draw_temp(int t)
   mug_disp_cimg(disp_handle, (cimg_handle_t)&canvas);
 }
 
-#endif
 void on_temp(int board_temp, int mug_temp, int battery_temp)
 {
   printf("%d, %d, %d\n", board_temp, mug_temp, battery_temp);
@@ -73,22 +49,8 @@ int main(int argc, char** argv)
   disp_handle = mug_disp_init();
   temp_handle = mug_temp_init();
 
-#ifdef USE_LIBUV
   mug_temp_on(temp_handle, on_temp, 1000);
   mug_run_temp_watcher(temp_handle);
-#else
-  printf("handle: 0%x\n", temp_handle);
- 
-  while(1) {
-#if 0
-    mug_read_temp(handle, &data);
-    printf("board: %4d, mug: %4d, battery: %4d\n", data.board_temp, data.mug_temp, data.battery_temp);
-#else
-   int temp = mug_read_board_temp(temp_handle);
-   printf("board temp: %d\n", temp);
-#endif
-    usleep(500*1000);
-  }
-#endif
+
   return 0;
 }

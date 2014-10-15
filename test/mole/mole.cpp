@@ -217,10 +217,10 @@ void show_result()
 
   char temp[4];
   sprintf(temp, "%02d", score.touched);
-  mug_draw_number_str_cimg((cimg_handle_t)&canvas, 0, 0, temp, red);
+  mug_draw_number_str_cimg((cimg_handle_t)&canvas, 0, 0, temp, "red");
 
   sprintf(temp, "%02d", score.all);
-  mug_draw_number_str_cimg((cimg_handle_t)&canvas, width * 2 , 0, temp, green);
+  mug_draw_number_str_cimg((cimg_handle_t)&canvas, width * 2 , 0, temp, "green");
 
   disp_canvas();
 }

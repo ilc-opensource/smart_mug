@@ -67,9 +67,9 @@ int main(int argc, char **argv)
   printf(">>>> %s\n", ip_str);
 
   if(ip_str != NULL) {
-    mug_disp_text_marquee(disp_handle, ip_str, cyan, 150, DISP_INFINITE);
+    mug_disp_text_marquee(disp_handle, ip_str, "cyan", 150, DISP_INFINITE);
   } else {
-    mug_disp_text_marquee(disp_handle, "no ip", red, 100, DISP_INFINITE);
+    mug_disp_text_marquee(disp_handle, "no ip", "red", 100, DISP_INFINITE);
   }
 
 }

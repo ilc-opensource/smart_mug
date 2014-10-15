@@ -157,10 +157,12 @@ int   mug_disp_img(handle_t handle, char *name);
 char* mug_read_img_N(char* names, int *num, int *size);
 int   mug_disp_img_N(handle_t handle, char *names, int interval);
 void  mug_init_font(char *font);
-void  mug_disp_text_marquee(handle_t handle, char *text, unsigned char * color, int interval, int repeat);
+void  mug_disp_text_marquee(handle_t handle, const char *text, const char * color, int interval, int repeat);
+void  mug_disp_text_marquee_async(handle_t handle, const char *text, const char * color, int interval, int repeat);
+
 
 //color translation
-unsigned char color_2_raw(unsigned char* color);
+unsigned char color_2_raw(const char* color);
 unsigned char rgb_2_raw(unsigned char R,unsigned char G,unsigned B);
 
 typedef unsigned long cimg_handle_t;
@@ -175,15 +177,16 @@ void  mug_number_text_shape(int *width, int *height);
 cimg_handle_t  mug_new_cimg(int width, int height);
 cimg_handle_t  mug_new_canvas();
 cimg_handle_t  mug_load_pic_cimg(char* fname);
-void           mug_draw_number_str_cimg(cimg_handle_t img, int col, int row, char *str, unsigned char* color);
-void           mug_draw_number_cimg(cimg_handle_t canvas, int col, int row, int num, mug_color_t color);
+void           mug_draw_number_str_cimg(cimg_handle_t img, int col, int row, const char *str, const char* color);
 void           mug_overlay_cimg(cimg_handle_t canvas, int col, int row, cimg_handle_t img);
 void           mug_destroy_cimg(cimg_handle_t hdl);
 char*          mug_cimg_get_raw(cimg_handle_t cimg);
-void           mug_draw_text_cimg(cimg_handle_t img, int col, int row, char *text, unsigned char* color, int height);
+void           mug_draw_text_cimg(cimg_handle_t img, int col, int row, const char *text, const char* color, int height);
 void           mug_save_cimg(cimg_handle_t cimg, char *name);
 void           mug_disp_cimg_marquee(handle_t handle, cimg_handle_t img, int interval, int repeat);
-cimg_handle_t  mug_new_text_cimg(char* text, unsigned char* color);
+void           mug_disp_cimg_marquee_async(handle_t handle, cimg_handle_t img, int interval, int repeat);
+
+cimg_handle_t  mug_new_text_cimg(const char* text, const char* color);
 
 // motion sensor
 typedef struct _MPU6050 motion_data_t;

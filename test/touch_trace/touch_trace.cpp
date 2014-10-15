@@ -60,11 +60,11 @@ void on_touch_event(touch_event_t e, int x, int y, int id)
 
 void init()
 {
-  colors[0] = color_2_raw(green);
-  colors[1] = color_2_raw(yellow);
-  colors[2] = color_2_raw(magenta);
-  colors[3] = color_2_raw(cyan);
-  colors[4] = color_2_raw(blue);
+  colors[0] = color_2_raw("green");
+  colors[1] = color_2_raw("yellow");
+  colors[2] = color_2_raw("magenta");
+  colors[3] = color_2_raw("cyan");
+  colors[4] = color_2_raw("blue");
 
   memset(last, -1, sizeof(last));
 }

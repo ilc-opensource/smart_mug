@@ -63,7 +63,7 @@ bool utf8_to_unicode_uint(const string &src, vector<unsigned int> &dst) {
   return true;
 }
 
-char* utf8_to_unicode_char(char* src)
+char* utf8_to_unicode_char(const char* src)
 {
   string str(src);
   unicode_uint_t dst;
@@ -83,7 +83,7 @@ char* utf8_to_unicode_char(char* src)
   return uc;
 }
 
-wchar_t* utf8_to_unicode_wchar(char* src)
+wchar_t* utf8_to_unicode_wchar(const char* src)
 {
   return(wchar_t*)(utf8_to_unicode_char(src));
 }
