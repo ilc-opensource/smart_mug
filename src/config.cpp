@@ -96,7 +96,7 @@ void read_config_json()
   fclose(fp);
 
   json = cJSON_Parse(data);
-  MUG_ASSERT(json != NULL && json->type == cJSON_Object, "Not a valid mug config file");
+  MUG_ASSERT(json != NULL && json->type == cJSON_Object, "%s is NOT a valid mug config file", path.c_str());
 
   free(data);
 }

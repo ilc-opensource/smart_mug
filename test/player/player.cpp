@@ -1,10 +1,12 @@
 #include <stdlib.h>
 #include <dirent.h>
+#include <string.h>
 
 #include <string>
 #include <vector>
 
 #include <mug.h>
+#include <config.h>
 using namespace std;
 
 typedef vector<string> name_list_t;
@@ -14,36 +16,58 @@ int idx = 0;
 int hit_idx = -1;
 
 
-int vol = 5;
+int vol = 50;
 
-#define VOL_MAX 16
+#define VOL_MAX 99
 #define VOL_MIN 0
-#define VOL_STEP 2
+#define VOL_STEP 10
 
 handle_t disp_handle;
 handle_t touch_handle;
 
-#define HIT "magenta"
+#define HIT  "magenta"
 #define IDLE "cyan"
+#define REP  "###"
 
-#define CMD "cat"
-#define OPTION "/dev/pts/1"
+static const char *player_bin = NULL;
+static const char *player_option = NULL;
+static const char *vol_control = NULL;
+static const char *target = NULL;
+static const char *kill_cmd = NULL;
+static const char *run_cmd = NULL;
 
+
+void replace(string &str, string src, string repl)
+{
+  size_t pos = str.find(src);  
+  str.erase(pos, src.length());
+  str.insert(pos, repl);
+}
 void run_player(char *option)
 {
-  printf("run player %s\n", option);
-  string str(CMD);
+  string str(player_bin);
+  string rep(REP);
+
   str += " ";
-  str += OPTION;
+  str += player_option;
   str += " &";
-  system(str.c_str());
+
+  replace(str, rep, option);
+  
+  string run_str(run_cmd);
+  replace(run_str, REP, str);
+
+  printf("run: %s\n", run_str.c_str());
+
+  system(run_str.c_str());
 }
 
 void stop_player()
-{
-  printf("stop player\n");
-  string str("killall ");
-  str += CMD;
+{  
+  string str(kill_cmd);
+  replace(str, REP, player_bin);
+  printf("%s\n", str.c_str());
+
   system(str.c_str());
 }
 
@@ -100,8 +124,12 @@ void on_touch_event(touch_event_t e, int x, int y, int id)
     stop_player();
   }
 
+  string f;
   if(hit_idx < 0 || hit_idx != idx) {
-    run_player(file_list[idx].c_str());
+    f = target;
+    f += "/";
+    f += file_list[idx];
+    run_player(f.c_str());
     hit_idx = idx;
   } else {
     hit_idx = -1;
@@ -114,9 +142,15 @@ void on_touch_event(touch_event_t e, int x, int y, int id)
 }
 
 void disp_vol()
-{
+{  
   char buf[16];
   sprintf(buf, "%d", vol);
+
+  string str(vol_control);
+  replace(str, REP, buf);
+  printf("%s\n", str.c_str());
+  system(str.c_str());
+
   mug_disp_text_marquee(disp_handle, buf, "yellow", 200, 1);
 }
 
@@ -159,14 +193,25 @@ void on_gesture(gesture_t g, char* info)
 
 int main(int argc, char** argv)
 {
-  stop_player();
-
   if(argc != 2) {
     printf("must specify target directory\n");
     return 1;
   }
-    
-  char *target = argv[1];
+
+  player_bin = mug_query_config_string(CONFIG_PLAYER);
+  player_option = mug_query_config_string(CONFIG_PLAYER_OPTION);
+  vol_control = mug_query_config_string(CONFIG_VOL_CONTROL);
+  kill_cmd = mug_query_config_string(CONFIG_KILL_CMD);
+  run_cmd = mug_query_config_string(CONFIG_RUN_CMD);
+  if(strlen(player_bin) == 0) {
+    printf("must set %s in mug config file\n", CONFIG_PLAYER);
+    return 1;
+  }
+
+  stop_player();
+
+  target = argv[1];
+  
   scan_files(target);
 
   mug_init_font(NULL);

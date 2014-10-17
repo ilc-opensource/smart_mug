@@ -1,0 +1,10 @@
+{
+  "reverse_y": 0,
+  "font" : "/home/root/msyh.ttf",
+  "player" : "gst-launch",
+  "player_option" : "filesrc location=\"###\" ! flump3dec ! alsasink device=plughw:1,0",
+  "vol_control" : "amixer -c 1 cset numid=6 ###%",
+  "kill_cmd" : "killall -SIGINT ###",
+  "run_cmd" : "sleep 1; ###"
+}
+
