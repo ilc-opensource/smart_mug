@@ -30,4 +30,12 @@ make Release=1
 make test
 ```
 
+## Contacts
+
+Project manager: Jiqiang Song, jiqiang.song@intel.com
+
+SDK: Zhanglin Liu, zhanglin.liu@intel.com 
+
+App Management: Chao Zhang, chao.a.zhang@intel.com
+
 
