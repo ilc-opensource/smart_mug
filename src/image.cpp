@@ -770,7 +770,7 @@ void mug_init_font(char *font)
     img_env_init();
   }
 
-  if(font == NULL) {
+  if(font == NULL || strlen(font) == 0) {
     disp_font = (char*)mug_query_config_string(CONFIG_FONT);
     initFreetype(ftlib, face, disp_font);
   }

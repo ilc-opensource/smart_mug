@@ -181,7 +181,8 @@ void           mug_draw_number_str_cimg(cimg_handle_t img, int col, int row, con
 void           mug_overlay_cimg(cimg_handle_t canvas, int col, int row, cimg_handle_t img);
 void           mug_destroy_cimg(cimg_handle_t hdl);
 char*          mug_cimg_get_raw(cimg_handle_t cimg);
-void           mug_draw_text_cimg(cimg_handle_t img, int col, int row, const char *text, const char* color, int height);
+//void           mug_draw_text_cimg(cimg_handle_t img, int col, int row, const char *text, const char* color, int height);
+void           mug_draw_text_cimg(cimg_handle_t img, int col, int row, const char *text, const char* color, int height, int *str_width, int *str_height);
 void           mug_save_cimg(cimg_handle_t cimg, char *name);
 void           mug_disp_cimg_marquee(handle_t handle, cimg_handle_t img, int interval, int repeat);
 void           mug_disp_cimg_marquee_async(handle_t handle, cimg_handle_t img, int interval, int repeat);

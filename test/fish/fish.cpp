@@ -31,6 +31,14 @@ const char* fish_pics[] = {"fish0.bmp", "fish1.bmp"};
 #define TEMP_WARM 30
 #define TEMP_HOT  50
 
+#ifdef LED_STRIP
+#define NOTIFY_DOWN  "/home/root/send.js stat fish_down"
+#define NOTIFY_UP    "/home/root/send.js stat fish_up"
+#define NOTIFY_READY "/home/root/send.js stat fish_ready"
+#endif
+
+int is_up = true;
+
 typedef struct fish_t_ {
 
   int x, y;
@@ -163,7 +171,16 @@ void fish_swim(fish_t *f)
     f->x_speed = 0;
     f->y_speed = 0;
   }
- 
+
+  if(f->health == 0 && is_up) {
+    is_up = false;
+
+#ifdef LED_STRIP
+    printf("%s", NOTIFY_DOWN);
+    system(NOTIFY_DOWN);
+#endif
+  }
+
   // If fish has not engergy, just sink down
   if(f->x_speed == 0 && f->y_speed == 0) {
     if(f->y < (SCREEN_HEIGHT - f->img->height()))
@@ -214,6 +231,12 @@ void on_motion(int ax, int ay, int az, int gx, int gy, int gz)
     fish->x_speed = DEFAULT_SPEED;
     fish->y_speed = DEFAULT_SPEED;
     fish->health = DEFAULT_HEALTH;
+    is_up = true;
+
+#ifdef LED_STRIP
+    printf("%s", NOTIFY_UP);
+    system(NOTIFY_UP);
+#endif
    }
 }
 
@@ -290,7 +313,11 @@ int main()
 
   // read click
   mug_touch_event_on(touch_handle, TOUCH_CLICK, on_click);
-  
+
+#ifdef LED_STRIP
+  printf("%s", NOTIFY_READY);
+  system(NOTIFY_READY);
+#endif  
   mug_run_motion_watcher(motion_handle);
 }
 
