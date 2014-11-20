@@ -2,8 +2,13 @@
 #include <dirent.h>
 #include <string.h>
 
+#include <sys/types.h>
+#include <signal.h>
+#include <unistd.h>
+
 #include <string>
 #include <vector>
+#include <iostream>
 
 #include <mug.h>
 #include <config.h>
@@ -25,7 +30,7 @@ int vol = 50;
 handle_t disp_handle;
 handle_t touch_handle;
 
-#define HIT  "magenta"
+#define HIT  "green"
 #define IDLE "cyan"
 #define REP  "###"
 
@@ -36,13 +41,19 @@ static const char *target = NULL;
 static const char *kill_cmd = NULL;
 static const char *run_cmd = NULL;
 
+#define RUN_PLAYER "./run_player.js"
+#define STOP_PLAYER "./stop_player.sh"
 
+static pid_t pid = 0;
+ 
 void replace(string &str, string src, string repl)
 {
   size_t pos = str.find(src);  
   str.erase(pos, src.length());
   str.insert(pos, repl);
 }
+
+#if 0
 void run_player(char *option)
 {
   string str(player_bin);
@@ -61,7 +72,6 @@ void run_player(char *option)
 
   system(run_str.c_str());
 }
-
 void stop_player()
 {  
   string str(kill_cmd);
@@ -70,6 +80,31 @@ void stop_player()
 
   system(str.c_str());
 }
+#else
+
+void run_player(char *option) 
+{
+  string str(RUN_PLAYER);
+  char temp[10];
+  sprintf(temp, "%d", pid);
+
+  str += " \"";
+  str += option;
+  str += "\" ";
+  str += temp;
+  str += " &";
+
+  printf("%s\n", str.c_str());
+  system(str.c_str());
+}
+
+void stop_player() 
+{
+  string cmd(STOP_PLAYER);
+  system(cmd.c_str());
+}
+
+#endif
 
 bool filter_file(string &str)
 {
@@ -126,19 +161,20 @@ void on_touch_event(touch_event_t e, int x, int y, int id)
 
   string f;
   if(hit_idx < 0 || hit_idx != idx) {
+    hit_idx = idx;
+    disp_curr_file();
+
     f = target;
     f += "/";
     f += file_list[idx];
     run_player(f.c_str());
-    hit_idx = idx;
   } else {
     hit_idx = -1;
+    disp_curr_file();
   }
 
   fflush(0);
-
   //printf("after idx: %d, hit: %d\n", idx, hit_idx);  
-  disp_curr_file();
 }
 
 void disp_vol()
@@ -191,12 +227,25 @@ void on_gesture(gesture_t g, char* info)
   disp_curr_file();
 }
 
+void on_signal(int signo) 
+{
+  if(signo == SIGUSR1) {
+    printf("catched user1\n");
+    stop_player();
+    hit_idx = -1;
+    disp_curr_file();
+  }
+}
+
 int main(int argc, char** argv)
 {
   if(argc != 2) {
     printf("must specify target directory\n");
     return 1;
   }
+
+  pid = getpid();
+  printf("pid: %d\n", pid);
 
   player_bin = mug_query_config_string(CONFIG_PLAYER);
   player_option = mug_query_config_string(CONFIG_PLAYER_OPTION);
@@ -213,6 +262,8 @@ int main(int argc, char** argv)
   target = argv[1];
   
   scan_files(target);
+
+  signal(SIGUSR1, on_signal);
 
   mug_init_font(NULL);
 

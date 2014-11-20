@@ -23,6 +23,7 @@ typedef enum {
   IOHUB_CMD_MOTION_SENSOR = 3,
   IOHUB_CMD_TOUCH_PANEL   = 4,
   IOHUB_CMD_CHANNEL_CTRL  = 6,
+  IOHUB_CMD_SHUT_DOWN     = 7,
   CMD_MAX
 } cmd_t;
 

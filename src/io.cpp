@@ -80,6 +80,7 @@ mug_error_t dev_send_command(handle_t handle, cmd_t cmdtype, char *data, int mes
     break;
 
   case IOHUB_CMD_FB:
+  case IOHUB_CMD_SHUT_DOWN:
     err = (mug_error_t)iohubd_write_block_data((int)handle, cmdtype, message_len, (const __u8*)data); 
     break;
   
@@ -94,9 +95,13 @@ mug_error_t dev_send_command(handle_t handle, cmd_t cmdtype, char *data, int mes
     if(ret <= 0)
       err = ERROR_CAN_NOT_GET_REPLY;
     break;
+
+  default:
+     MUG_ASSERT(false, "unsupport io cmd");
   }
 
   return err;
+
 }
 
 
@@ -175,4 +180,14 @@ void stop_mcu_disp(int fd, int cnt)
 void mug_stop_mcu_disp(handle_t handle)
 {
   stop_mcu_disp(handle, 40);
+}
+
+void mug_shut_down_mcu(int sec)
+{
+
+  handle_t handle = mug_disp_init();
+
+  char delay = sec;
+
+  dev_send_command(handle, IOHUB_CMD_SHUT_DOWN, &delay, sizeof(delay));
 }

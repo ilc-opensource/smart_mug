@@ -4,6 +4,8 @@
 #include <mug.h>
 #define _print(...) fprintf(fp, __VA_ARGS__)
 
+#define DISP
+
 int main(int argc, char** argv)
 {
 
@@ -12,8 +14,9 @@ int main(int argc, char** argv)
     return 0;
   }
 
-
+#ifdef DISP
   handle_t handle = mug_disp_init();
+#endif
 
   char *file_list = argv[1];
   int duration = atoi(argv[2]);
@@ -39,11 +42,13 @@ int main(int argc, char** argv)
   _print("  size    : %d bytes\n", size);
   _print("************************************/\n\n");
 
-  _print("struct LedFrame frames[MAX_LED_FRAMES] = {\n");
+  _print("struct LedFrame ledFrames[MAX_LED_FRAMES] = {\n");
 
   for(int i = 0; i < num; i++) {
     usleep(duration * 1000);
+#ifdef DISP
     mug_disp_raw(handle, p);
+#endif
     
     _print("  { // %d\n", i);
     _print("    %d, \n", duration);

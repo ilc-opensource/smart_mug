@@ -1,6 +1,6 @@
 PACKS=fish temperature motion get_ip touch_trace mole
 
-TESTS= $(PACKS) show_raw show_raw_N animation show_image touch image_to_raw stop_mcu_flush text
+TESTS= $(PACKS) show_raw show_raw_N animation show_image touch image_to_raw stop_mcu_flush text mug_shut_down
 
 PACK_BIN=app_packs.tgz
 

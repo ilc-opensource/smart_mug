@@ -139,6 +139,7 @@ typedef int mug_error_t;
 // device control
 handle_t mug_init(device_t type);
 void     mug_close(handle_t handle);
+void     mug_shut_down_mcu(int sec);
 
 // display
 handle_t     mug_disp_init();
