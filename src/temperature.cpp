@@ -5,6 +5,7 @@
 #include <iohub_client.h>
 #include <math.h>
 #include <mug.h>
+#include <RTC.h>
 
 #ifndef USE_IOHUB
 #include <io.h>
@@ -23,6 +24,32 @@ typedef struct _req_temp_t {
 #endif
 
 #define TEMP_NUM 3
+
+int R_to_T(float r) 
+{
+  RT_t *rt;
+  for(int i = 0; i < RT_table_len; i++) {
+    rt = &(RT_table[i]);
+    if(rt->rmin <= r && r <= rt->rmax)
+      return rt->temp;
+  }
+
+  MUG_ASSERT(false, "can not calculate temperature\n");
+
+}
+
+float V_to_R(float v)
+{
+  return 10.0 * v /(3.3 - v);
+}
+
+int V_to_T(float v)
+{
+  float r = V_to_R(v);
+  int t = R_to_T(r);
+  return t;
+}
+
 handle_t mug_temp_init()
 {
   return mug_init(DEVICE_LED);
@@ -30,9 +57,15 @@ handle_t mug_temp_init()
 
 int voltage_to_temp(uint16_t data)
 {
+#if 0
   float voltage = data * 3.3 / 1024;
   float tempf = 4050.0/(logf(0.213 * voltage / (3.3 - 2 * voltage)) + 13.59) - 273; 
   return (int)tempf;
+#else
+  float voltage = data * 3.3 / 1024;
+  return V_to_T(voltage);
+#endif
+  
 }
 
 mug_error_t mug_read_temp(handle_t handle, temp_data_t *temp)
@@ -44,9 +77,9 @@ mug_error_t mug_read_temp(handle_t handle, temp_data_t *temp)
 #else
   mug_error_t err = dev_send_command(handle, IOHUB_CMD_ADC, (char*)&voltage, sizeof(voltage));
 #endif
-  temp->board_temp   = voltage_to_temp(voltage[0]);
-  temp->mug_temp     = voltage_to_temp(voltage[1]);
-  temp->battery_temp = voltage_to_temp(voltage[2]);
+  temp->mug_temp   = voltage_to_temp(voltage[0]);
+  temp->board_temp  = voltage_to_temp(voltage[1]);
+  //temp->battery_temp = voltage_to_temp(voltage[2]);
   return err;
 }
 
