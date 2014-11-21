@@ -56,7 +56,7 @@ typedef vector<cimg_t> cimg_vec_t;
 
 // freetruetype variabls
 FT_Library ftlib;
-FT_Face face;
+FT_Face face = NULL;
 
 #define DEFAULT_FONT "simhei.ttf"
 
@@ -728,6 +728,9 @@ void mug_draw_text_cimg(cimg_handle_t img,
   free(wc);
   
   unsigned char *rgb = color_to_rgb(color);
+
+  if(face == NULL)
+    mug_init_font(NULL);
 
   drawText(face, *(cimg_t*)img, height, str, col, row, *str_width, *str_height, rgb);
 }
