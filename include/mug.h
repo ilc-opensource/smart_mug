@@ -58,12 +58,12 @@ struct _MPU6050 {
 #define IMG_OK           0
 #define IMG_ERROR        1
 
-typedef struct _temp_data_t 
+typedef struct _adc_data_t 
 {
-  int board_temp;
   int mug_temp;
-  int battery_temp;
-}temp_data_t;
+  int board_temp;
+  int battery;
+}adc_data_t;
 
 typedef struct _touch_point_t
 {
@@ -205,16 +205,28 @@ void         mug_set_motion_timer(handle_t handle, int interval);
 void         mug_run_motion_watcher(handle_t handle);
 
 
-// temprature
-typedef void (*temp_cb_t)(int, int, int);
+typedef void (*temp_cb_t)(int, int);
+typedef void (*battery_cb_t)(int);
 
+// adc
+handle_t    mug_adc_init();
+mug_error_t mug_read_adc(handle_t handle, adc_data_t *data);
+int         mug_adc_on(handle_t handle, temp_cb_t temp_cb, battery_cb_t battery_cb, int interval);
+void        mug_run_adc_watcher(handle_t handle);
+
+// temprature
 handle_t    mug_temp_init();
-mug_error_t mug_read_temp(handle_t handle, temp_data_t *data);
 int         mug_read_board_temp(handle_t handle);
 int         mug_read_mug_temp(handle_t handle);
-int         mug_read_battery_temp(handle_t handle);
 int         mug_temp_on(handle_t handle, temp_cb_t cb, int interval);
 void        mug_run_temp_watcher(handle_t handle);
+
+// battery
+handle_t    mug_battery_init();
+int         mug_read_battery(handle_t handle);
+int         mug_battery_on(handle_t handle, battery_cb_t cb, int interval);
+void        mug_run_battery_watcher(handle_t handle);
+
 
 
 // touch panel

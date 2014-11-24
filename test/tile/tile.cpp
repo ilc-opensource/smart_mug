@@ -13,7 +13,7 @@ CImg<unsigned char> canvas(SCREEN_WIDTH, SCREEN_HEIGHT, 1, 3, 0);
 #define HOT  50
 
 handle_t disp_handle;
-handle_t temp_handle;
+handle_t motion_handle;
 
 void clear_canvas()
 {
@@ -23,7 +23,7 @@ void clear_canvas()
 
 }
 
-void draw_temp(int t)
+void draw_data(int t)
 {
   clear_canvas();
  
@@ -36,20 +36,20 @@ void draw_temp(int t)
   mug_disp_cimg(disp_handle, (cimg_handle_t)&canvas);
 }
 
-void on_temp(int mug_temp, int board_temp)
+
+void on_motion_angle(float angle_x, float angle_y, float angle_z)
 {
-  printf("%d, %d\n", mug_temp, board_temp);
-  draw_temp(mug_temp);
+  printf("%f, %f, %f\n", angle_x, angle_y, angle_z);
+  draw_data((int)angle_z);
 }
 
 int main(int argc, char** argv)
 {
-
   disp_handle = mug_disp_init();
-  temp_handle = mug_temp_init();
+  motion_handle = mug_motion_init();
 
-  mug_temp_on(temp_handle, on_temp, 1000);
-  mug_run_temp_watcher(temp_handle);
-
+  mug_motion_angle_on(motion_handle, on_motion_angle);
+ 
+  mug_run_motion_watcher(motion_handle);
   return 0;
 }

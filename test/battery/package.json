@@ -1,0 +1,8 @@
+{
+  "name"   : "battery",
+  "package": "com.intel.smart_mug.battery",
+  "version": "0.0.1",
+  "icon"   : "icon.bmp",
+  "start"  : "app.js",
+  "description": "display battery of board"
+}
