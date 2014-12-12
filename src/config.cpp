@@ -63,7 +63,7 @@ const char* get_default_string(const char *key)
 #undef DEF_STR
 #undef DEF_DB
 
-  MUG_ASSERT(false, "No default setting for %s\n", key);
+  return "";
 }
 
 void read_config_json()

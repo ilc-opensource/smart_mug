@@ -151,6 +151,8 @@ void         mug_stop_mcu_disp(handle_t handle);
 char* mug_create_raw_buffer();
 void  mug_free_raw_buffer(char *buf);
 void  mug_set_pixel_raw_color(char *raw, int col, int row, unsigned char color);
+unsigned char * color_to_rgb(const char *color);
+
 
 // raw image operation
 int   mug_read_img_to_raw(char *fname, char *buf);
@@ -187,6 +189,7 @@ void           mug_draw_text_cimg(cimg_handle_t img, int col, int row, const cha
 void           mug_save_cimg(cimg_handle_t cimg, char *name);
 void           mug_disp_cimg_marquee(handle_t handle, cimg_handle_t img, int interval, int repeat);
 void           mug_disp_cimg_marquee_async(handle_t handle, cimg_handle_t img, int interval, int repeat);
+void           mug_stop_marquee(handle_t handle);
 
 cimg_handle_t  mug_new_text_cimg(const char* text, const char* color);
 
@@ -206,11 +209,10 @@ void         mug_run_motion_watcher(handle_t handle);
 
 
 typedef void (*temp_cb_t)(int, int);
-typedef void (*battery_cb_t)(int);
+typedef void (*battery_cb_t)(int, int);
 
 // adc
 handle_t    mug_adc_init();
-mug_error_t mug_read_adc(handle_t handle, adc_data_t *data);
 int         mug_adc_on(handle_t handle, temp_cb_t temp_cb, battery_cb_t battery_cb, int interval);
 void        mug_run_adc_watcher(handle_t handle);
 
@@ -223,7 +225,7 @@ void        mug_run_temp_watcher(handle_t handle);
 
 // battery
 handle_t    mug_battery_init();
-int         mug_read_battery(handle_t handle);
+int         mug_read_battery(handle_t handle, bool *is_charge);
 int         mug_battery_on(handle_t handle, battery_cb_t cb, int interval);
 void        mug_run_battery_watcher(handle_t handle);
 

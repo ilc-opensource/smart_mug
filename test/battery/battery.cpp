@@ -4,6 +4,9 @@
 #include <stdlib.h>
 #include <mug.h>
 
+#include <string>
+using namespace std;
+
 #include <CImg.h>
 using namespace cimg_library;
 
@@ -23,23 +26,26 @@ void clear_canvas()
 
 }
 
-void draw_data(int t)
+void draw_data(int t, char *c)
 {
   clear_canvas();
  
   char temp[5];
 
   sprintf(temp, "%d", t);
-
-  canvas.draw_text(0, 0, temp, cyan, black);
+   
+  canvas.draw_text(0, 0, temp, color_to_rgb(c), black);
 
   mug_disp_cimg(disp_handle, (cimg_handle_t)&canvas);
 }
 
-void on_battery(int percent)
+void on_battery(int percent, bool is_charge)
 {
   printf("%d\n", percent);
-  draw_data(percent);
+  if(is_charge)
+    draw_data(percent, "green");
+  else
+    draw_data(percent, "magenta");
 }
 
 int main(int argc, char** argv)

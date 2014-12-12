@@ -31,7 +31,3 @@ clean:
 	rm -rf $(TARGET)
 
 .PHONY: clean all
-
-
-
-

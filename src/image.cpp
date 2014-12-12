@@ -689,6 +689,10 @@ end:
   UNLOCK_(&marquee_mutex);
 }
 
+void mug_stop_marquee(handle_t handle)
+{
+  stop_marquee();
+}
 
 void mug_disp_cimg_marquee_async(handle_t handle, cimg_handle_t img, int interval, int repeat)
 {

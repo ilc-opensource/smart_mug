@@ -9,13 +9,10 @@ console.log(JSON.stringify(argv));
 
 var isSIGINT = false;
 
-var cmdRun = "gst-launch-0.10 filesrc location=\"" + argv[2] + "\" ! flump3dec ! alsasink device=plughw:1,0";
-
 var cmdKill = "kill -USR1 " + argv[3];
 
-console.log(cmdRun);
-
-var player = spawn("gst-launch-0.10", ["filesrc", "location=\"" + argv[2] + "\"", "!", "flump3dec", "!", "alsasink", "device=plughw:1,0"]);
+//var player = spawn("gst-launch-0.10", ["filesrc", "location=\"" + argv[2] + "\"", "!", "flump3dec", "!", "alsasink", "device=plughw:1,0"]);
+var player = spawn("gst-launch-0.10", ["filesrc", "location=\"" + argv[2] + "\"", "!", "flump3dec", "!", "alsasink"]);
 
 player.stdout.on('data', function(data) {
   console.log('[stdout] ' + data);

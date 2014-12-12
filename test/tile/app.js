@@ -5,9 +5,9 @@ var child_process = require('child_process');
 var io = require('../../main/highLevelAPI/io.js');
 var sys = require('../../main/highLevelAPI/sys.js');
 
-var logPrefix = '[app battery] '
+var logPrefix = '[app tile] '
 
-var appProcess = child_process.execFile(path.join(__dirname, 'battery'));
+var appProcess = child_process.execFile(path.join(__dirname, 'tile'));
 
 // Touch event handler begin
 // For none js app only

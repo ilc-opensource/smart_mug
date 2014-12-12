@@ -32,17 +32,12 @@ handle_t touch_handle;
 
 #define HIT  "green"
 #define IDLE "cyan"
-#define REP  "###"
 
-static const char *player_bin = NULL;
-static const char *player_option = NULL;
-static const char *vol_control = NULL;
 static const char *target = NULL;
-static const char *kill_cmd = NULL;
-static const char *run_cmd = NULL;
 
-#define RUN_PLAYER "./run_player.js"
-#define STOP_PLAYER "./stop_player.sh"
+#define RUN_PLAYER      "./run_player.js"
+#define STOP_PLAYER     "./stop_player.sh"
+#define VOL_CONTROLLER  "./vol.sh"
 
 static pid_t pid = 0;
  
@@ -182,9 +177,10 @@ void disp_vol()
   char buf[16];
   sprintf(buf, "%d", vol);
 
-  string str(vol_control);
-  replace(str, REP, buf);
-  printf("%s\n", str.c_str());
+  string str(VOL_CONTROLLER);
+  str += " ";
+  str += buf;
+ 
   system(str.c_str());
 
   mug_disp_text_marquee(disp_handle, buf, "yellow", 200, 1);
@@ -234,6 +230,12 @@ void on_signal(int signo)
     stop_player();
     hit_idx = -1;
     disp_curr_file();
+  } 
+
+  if(signo == SIGINT) {
+    printf("catched ctrl + c\n");
+    stop_player();
+    exit(0);
   }
 }
 
@@ -247,16 +249,6 @@ int main(int argc, char** argv)
   pid = getpid();
   printf("pid: %d\n", pid);
 
-  player_bin = mug_query_config_string(CONFIG_PLAYER);
-  player_option = mug_query_config_string(CONFIG_PLAYER_OPTION);
-  vol_control = mug_query_config_string(CONFIG_VOL_CONTROL);
-  kill_cmd = mug_query_config_string(CONFIG_KILL_CMD);
-  run_cmd = mug_query_config_string(CONFIG_RUN_CMD);
-  if(strlen(player_bin) == 0) {
-    printf("must set %s in mug config file\n", CONFIG_PLAYER);
-    return 1;
-  }
-
   stop_player();
 
   target = argv[1];
@@ -264,6 +256,7 @@ int main(int argc, char** argv)
   scan_files(target);
 
   signal(SIGUSR1, on_signal);
+  signal(SIGINT,  on_signal);
 
   mug_init_font(NULL);
 

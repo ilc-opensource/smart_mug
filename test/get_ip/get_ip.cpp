@@ -62,14 +62,16 @@ int main(int argc, char **argv)
     if_name = argv[1];
   }
 
-  char *ip_str = get_ip(if_name);
+  while(true) {
+    char *ip_str = get_ip(if_name);
 
-  printf(">>>> %s\n", ip_str);
+    printf(">>>> %s\n", ip_str);
 
-  if(ip_str != NULL) {
-    mug_disp_text_marquee(disp_handle, ip_str, "cyan", 150, DISP_INFINITE);
-  } else {
-    mug_disp_text_marquee(disp_handle, "no ip", "red", 100, DISP_INFINITE);
+    if(ip_str != NULL) {
+      mug_disp_text_marquee(disp_handle, ip_str, "cyan", 150, 1);
+    } else {
+      mug_disp_text_marquee(disp_handle, "no ip", "red", 100, 1);
+    }
+
   }
-
 }

@@ -14,7 +14,9 @@
 
 
 #define TP_DEV_PATH         "/dev/input/event1"
-#define MPU_DEV_PATH        "/sys/class/hwmon/hwmon7/device/data"
+#define MPU_DEV_PATH        "/sys/class/hwmon/hwmon6/device/data"
+
+#define MPU_DEV_CONFIG      "mpu_dev"
 
 handle_t dev_open(device_t type)
 {
@@ -107,9 +109,17 @@ mug_error_t dev_send_command(handle_t handle, cmd_t cmdtype, char *data, int mes
 
 int get_mpu_handle()
 {
-  int handle = open(MPU_DEV_PATH, O_RDONLY);
+  char *config = mug_query_config_string(MPU_DEV_CONFIG);
 
-  MUG_ASSERT(handle != -1, "can not open mpu handle\n");
+  
+  int handle;
+  
+  if(config == NULL || strlen(config) == 0)
+    config = MPU_DEV_PATH;
+
+  handle = open(config, O_RDONLY);
+
+  MUG_ASSERT(handle != -1, "can not open mpu handle: %s\ntry to set: %s in mug_config.json", config, MPU_DEV_CONFIG);
 
   return handle;
 }
