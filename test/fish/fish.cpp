@@ -58,6 +58,8 @@ handle_t motion_handle;
 handle_t touch_handle;
 handle_t temp_handle;
 
+static int temp;
+
 CImg<unsigned char> canvas(SCREEN_WIDTH, SCREEN_HEIGHT, 1, 3, 0);
 fish_t *fish = NULL;
 
@@ -81,7 +83,6 @@ void clear_canvas()
   canvas.draw_rectangle(0, 0, 0,
                         SCREEN_WIDTH, SCREEN_HEIGHT, 0,
                         black);
-
 }
 
 void change_img_color(CImg<unsigned char> &img, unsigned char *color)
@@ -215,6 +216,14 @@ void resize_fish(fish_t *f)
   f->img_left->resize(5, 4);
 }
 
+void draw_temp()
+{
+  char buf[16];
+  sprintf(buf, "%d", temp);
+
+  mug_draw_number_str_cimg((cimg_handle_t)&canvas, 0, 0, buf, "cyan");
+}
+
 void disp_canvas()
 {
   mug_disp_cimg(disp_handle, (cimg_handle_t)&canvas);
@@ -240,15 +249,17 @@ void on_motion(int ax, int ay, int az, int gx, int gy, int gz)
    }
 }
 
-void on_temp(int board_temp, int mug_temp, int battery_temp)
+void on_temp(int mug_temp, int board_temp)
 {
-  printf("board temp: %d\n", board_temp);
+  printf("board temp: %d\n", mug_temp);
 
-  if(board_temp < TEMP_WARM) {
+  temp = mug_temp;
+
+  if(mug_temp < TEMP_WARM) {
     change_fish_color(fish, blue);
     fish->color = blue;
 
-  } else if( TEMP_WARM <= board_temp && board_temp < TEMP_HOT) {
+  } else if( TEMP_WARM <= mug_temp && mug_temp < TEMP_HOT) {
     change_fish_color(fish, yellow);
     fish->color = yellow;
 
@@ -283,6 +294,7 @@ void handle_fish()
 {
   draw_fish(fish);
   fish_swim(fish);
+  draw_temp();
   disp_canvas();
   clear_canvas();
 }

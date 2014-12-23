@@ -1,0 +1,8 @@
+{
+  "name"   : "tile",
+  "package": "com.intel.smart_mug.tile",
+  "version": "0.0.1",
+  "icon"   : "icon.bmp",
+  "start"  : "app.js",
+  "description": "display z-axis tile of board"
+}

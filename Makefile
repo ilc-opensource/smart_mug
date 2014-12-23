@@ -25,7 +25,7 @@ init:
 
 $(TARGET):$(OBJS)
 	cp $(LIB_PATH)/libiohub-client.a $(TARGET)
-	ar -rc $@ $^
+	$(AR) -rc $@ $^
 
 $(BUILD_PATH)/%.o: $(SRC_PATH)/%.cpp
 	$(CXX) $(C_FLAGS) -c $< -o $@
