@@ -63,6 +63,7 @@ void on_touch_event(touch_event_t e, int x , int y, int id)
   } else if(no->is_clicked(x, y)) {
     printf("NO\n");
     printf("%s\n", CMD_NO);
+    mug_set_text_marquee_style(MQ_PROLOG);
     mug_disp_text_marquee(disp_handle, "cancelled", "red", 100, 1); 
     printf("run %s\n", CMD_NO);
     exit(1);
