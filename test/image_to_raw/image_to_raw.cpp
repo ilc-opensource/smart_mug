@@ -10,7 +10,7 @@ int main(int argc, char** argv)
 {
 
   if(argc < 4) {
-    printf("image_to_raw input_file_list duration output\n");
+    printf("\"01.bmp;02.bmp\" 200 output.h\n");
     return 0;
   }
 
