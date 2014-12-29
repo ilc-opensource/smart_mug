@@ -21,6 +21,8 @@ using namespace cimg_library;
 #include "ft2build.h"
 #include FT_FREETYPE_H
 
+static int marquee_style = MQ_ALL;
+
 // pthread variables
 static pthread_mutex_t img_mutex;
 static pthread_mutex_t marquee_mutex;
@@ -46,6 +48,7 @@ typedef struct disp_img_args_
   cimg_handle_t img;
   int           interval;
   int           repeat;
+  int           seamless;
 } disp_img_args_t;
 
 static disp_img_args_t thread_arg;
@@ -568,7 +571,10 @@ void mug_split_cimg(cimg_handle_t img, int step, cimg_vec_t &slices)
   cimg_t *cimg = (cimg_t*)img;
   
   int width = cimg->width();
-  int times = (width + step - 1) / step;
+
+  MUG_ASSERT(width >= SCREEN_WIDTH, "can not split image with width %d\n", width);
+
+  int times = (width - SCREEN_WIDTH + step - 1) / step + 1;
   int real_height = cimg->height() < SCREEN_HEIGHT ? cimg->height() : SCREEN_HEIGHT;
 
   int start, end;
@@ -576,12 +582,14 @@ void mug_split_cimg(cimg_handle_t img, int step, cimg_vec_t &slices)
   for(int i = 0; i < times; i++) {
     start = i * step;
     end = (start + SCREEN_WIDTH - 1);
-    if (end >= width - 1)
+    if (end >= width - 1) {
       end = width - 1;
+    }
 
     cimg_t crop = cimg->get_crop(start, 0, end, real_height - 1);
     cimg_t canvas = cimg_t(SCREEN_WIDTH, SCREEN_HEIGHT, 1, 3, 0);
     canvas.draw_image(0, 0, 0, 0, crop);
+    
     slices.push_back(canvas);
   }
 }
@@ -610,7 +618,7 @@ void* thread_entry(void *param)
     arg_copy = thread_arg;
     UNLOCK_(&img_mutex);
 
-    mug_disp_cimg_marquee(arg_copy.handle, arg_copy.img, arg_copy.interval, arg_copy.repeat);
+    mug_disp_cimg_marquee(arg_copy.handle, arg_copy.img, arg_copy.interval, arg_copy.repeat, arg_copy.seamless);
   }
 
   pthread_exit(NULL);
@@ -638,26 +646,46 @@ void notify_new_disp()
     sem_post(&new_disp_sem);
 }
 
-void mug_disp_cimg_marquee(handle_t handle, cimg_handle_t img, int interval, int repeat)
+void mug_disp_cimg_marquee(handle_t handle, cimg_handle_t img, int interval, int repeat, int seamless)
 {
   cimg_vec_t slices;
 
   cimg_t *cimg = (cimg_t*)img;
   //enlarge the original image
-  int ext = SCREEN_WIDTH, step = 2, offset = ext;
+  int step = 2, offset = 0;
+  int large_size = cimg->width();
 
-  if(cimg->width() < SCREEN_WIDTH) {
-    ext = SCREEN_WIDTH - cimg->width();
-    step = SCREEN_WIDTH;
-    offset = 0;
-  } 
-  cimg_t large(cimg->width() + ext, cimg->height(), 1, 3, 0);
-  large.draw_image(offset, 0, 0, *cimg);
 
-  cimg = &large;
+  if(seamless == MQ_NULL) {
+    cimg_t large(SCREEN_WIDTH, SCREEN_HEIGHT, 1, 3, 0);
+    large.draw_image(0, 0, 0, *cimg);
+    slices.push_back(large);
+  }  else {
 
-  mug_split_cimg((cimg_handle_t)cimg, step, slices);
+    if(seamless & MQ_PROLOG) {
+      if(cimg->width() < SCREEN_WIDTH) {
+        large_size = SCREEN_WIDTH * 2;
+      } else {
+        large_size = SCREEN_WIDTH + cimg->width();
+      }
+      offset = SCREEN_WIDTH;
+    } else {
+      large_size = cimg->width();
+    }
 
+    if(seamless & MQ_EPILOG) {
+      large_size += SCREEN_WIDTH;
+    }    
+
+    cimg_t large(large_size, SCREEN_HEIGHT, 1, 3, 0);
+    large.draw_image(offset, 0, 0, *cimg);
+
+    cimg = &large;
+
+    mug_split_cimg((cimg_handle_t)cimg, step, slices);
+  }
+
+  // transfer images to raw data
   int num = slices.size(); 
   char *buf = (char*)malloc(COMPRESSED_SIZE * num);
   char *p = buf;
@@ -694,7 +722,11 @@ void mug_stop_marquee(handle_t handle)
   stop_marquee();
 }
 
-void mug_disp_cimg_marquee_async(handle_t handle, cimg_handle_t img, int interval, int repeat)
+void mug_set_text_marquee_style(int s) {
+  marquee_style = s;
+}
+
+void mug_disp_cimg_marquee_async(handle_t handle, cimg_handle_t img, int interval, int repeat, int seamless)
 {
   stop_marquee();
 
@@ -703,6 +735,7 @@ void mug_disp_cimg_marquee_async(handle_t handle, cimg_handle_t img, int interva
   thread_arg.img = img;
   thread_arg.interval = interval;
   thread_arg.repeat = repeat;
+  thread_arg.seamless = seamless;
   notify_new_disp();
   UNLOCK_(&img_mutex);
 }
@@ -711,7 +744,7 @@ void mug_disp_text_marquee(handle_t handle, const char *text, const char * color
 {
   stop_marquee();
   cimg_handle_t img = mug_new_text_cimg(text, color);
-  mug_disp_cimg_marquee(handle, img, interval, repeat);
+  mug_disp_cimg_marquee(handle, img, interval, repeat, marquee_style);
   mug_destroy_cimg(img);
 }
 
@@ -719,7 +752,7 @@ void mug_disp_text_marquee_async(handle_t handle, const char *text, const char *
 {
   // TODO: remove potential memory leak
   cimg_handle_t img = mug_new_text_cimg(text, color);
-  mug_disp_cimg_marquee_async(handle, img, interval, repeat);
+  mug_disp_cimg_marquee_async(handle, img, interval, repeat, marquee_style);
 }
 
 void mug_draw_text_cimg(cimg_handle_t img, 

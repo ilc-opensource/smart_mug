@@ -32,6 +32,11 @@
     assert(0);    \
   }
 
+#define MQ_NULL     0x0
+#define MQ_PROLOG   0x1
+#define MQ_EPILOG   0x2
+#define MQ_ALL      0x3
+
 typedef long handle_t;
 
 #ifndef _LIBIOHUB_H_
@@ -160,9 +165,9 @@ int   mug_disp_img(handle_t handle, char *name);
 char* mug_read_img_N(char* names, int *num, int *size);
 int   mug_disp_img_N(handle_t handle, char *names, int interval);
 void  mug_init_font(char *font);
+void  mug_set_text_marquee_style(int s);
 void  mug_disp_text_marquee(handle_t handle, const char *text, const char * color, int interval, int repeat);
 void  mug_disp_text_marquee_async(handle_t handle, const char *text, const char * color, int interval, int repeat);
-
 
 //color translation
 unsigned char color_2_raw(const char* color);
@@ -187,8 +192,8 @@ char*          mug_cimg_get_raw(cimg_handle_t cimg);
 //void           mug_draw_text_cimg(cimg_handle_t img, int col, int row, const char *text, const char* color, int height);
 void           mug_draw_text_cimg(cimg_handle_t img, int col, int row, const char *text, const char* color, int height, int *str_width, int *str_height);
 void           mug_save_cimg(cimg_handle_t cimg, char *name);
-void           mug_disp_cimg_marquee(handle_t handle, cimg_handle_t img, int interval, int repeat);
-void           mug_disp_cimg_marquee_async(handle_t handle, cimg_handle_t img, int interval, int repeat);
+void           mug_disp_cimg_marquee(handle_t handle, cimg_handle_t img, int interval, int repeat, int seamless = MQ_PROLOG | MQ_EPILOG);
+void           mug_disp_cimg_marquee_async(handle_t handle, cimg_handle_t img, int interval, int repeat, int seamless = MQ_PROLOG | MQ_EPILOG);
 void           mug_stop_marquee(handle_t handle);
 
 cimg_handle_t  mug_new_text_cimg(const char* text, const char* color);
