@@ -140,6 +140,7 @@ double mug_query_config_double(const char *key)
 
 const char* mug_query_config_string(const char *key)
 {
+  
   cJSON *result = mug_query_config(key);
 
   if(result == NULL) {
