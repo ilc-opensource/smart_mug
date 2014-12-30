@@ -1,0 +1,7 @@
+{
+  "start_time"  : "2014-12-01 01:02:03",
+  "trigger_deg" : 70,
+  "min_deg"     : 10,
+  "dur_time"    : 1,
+  "trace"       : "drink_trace"
+}
