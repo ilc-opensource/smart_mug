@@ -1,8 +1,8 @@
 {
-  "name"   : "tile",
-  "package": "com.intel.smart_mug.tile",
+  "name"   : "drink",
+  "package": "com.intel.smart_mug.drink",
   "version": "0.0.1",
   "icon"   : "icon.bmp",
   "start"  : "app.js",
-  "description": "display z-axis tile of board"
+  "description": "drink monitor"
 }

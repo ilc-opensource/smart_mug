@@ -202,14 +202,15 @@ cimg_handle_t  mug_new_text_cimg(const char* text, const char* color);
 typedef struct _MPU6050 motion_data_t;
 typedef void (*motion_cb_t)(int, int, int, int, int, int);
 typedef void (*motion_angel_cb_t)(float, float, float);
-
+typedef void (*motion_shake_cb_t)(int);
 
 handle_t     mug_motion_init();
 mug_error_t  mug_read_motion(handle_t handle, motion_data_t *data);
 void         mug_motion_on(handle_t handle, motion_cb_t cb);
 void         mug_motion_angle_on(handle_t handle, motion_angel_cb_t acb);
 void         mug_set_motion_timer(handle_t handle, int interval);
-
+void         mug_motion_shake_on(handle_t handle, motion_shake_cb_t scb);
+void         mug_config_shake(handle_t handle, int period, int times);
 void         mug_run_motion_watcher(handle_t handle);
 
 

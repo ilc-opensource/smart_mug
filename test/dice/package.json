@@ -1,0 +1,8 @@
+{
+  "name"   : "dice",
+  "package": "com.intel.smart_mug.dice",
+  "version": "0.0.1",
+  "icon"   : "icon.bmp",
+  "start"  : "app.js",
+  "description": "shake to run a dice"
+}

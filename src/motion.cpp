@@ -5,10 +5,14 @@
 #include <stdlib.h>
 #include <math.h>
 
+#include <list>
+using namespace std;
+
 #include <iohub_client.h>
 #include <mug.h>
 
 #define MOTION_DEFAULT_INTERVAL 200
+#define MPU_ACC_G               16384
 
 #ifndef USE_IOHUB
 #include <io.h>
@@ -162,10 +166,156 @@ typedef struct _req_motion_t {
   mug_error_t   error;
   motion_cb_t   cb; 
   motion_angel_cb_t acb;
+  motion_shake_cb_t scb;
+
   int           interval;
 }req_motion_t;
 
+
 static req_motion_t *reqm = NULL;
+typedef list<int> acc_list_t;
+
+typedef struct _shake_t {
+
+  acc_list_t x_trace;
+  acc_list_t y_trace;
+  
+  int period;
+  int count;
+  int length;
+  int least_times;
+
+  int least_acc;
+
+}shake_t;
+
+static shake_t shake;
+
+#define DEFAULT_SHAKE_PERIOD 1000
+#define DEFAULT_SHAKE_TIMES  1
+#define DEFAULT_SHAKE_SENSITIVITY 10
+
+void mug_set_shake(int period, int times) 
+{
+  shake.period = period;
+  shake.least_times = times;
+
+  int wanted_times  = (2 * 2 * times);
+
+  int real_times = (period / reqm->interval);
+
+  if(real_times > wanted_times) {
+    shake.length = real_times;
+  } else {
+    shake.length = wanted_times;
+    reqm->interval = period / wanted_times;
+  }
+}
+
+void init_shake()
+{
+  shake.x_trace.clear();
+  shake.y_trace.clear();
+  shake.count = 0;
+  shake.least_times = 0;
+  shake.length = 0;
+  shake.period = 0;
+  shake.least_acc = MPU_ACC_G / DEFAULT_SHAKE_SENSITIVITY;
+
+  mug_set_shake(DEFAULT_SHAKE_PERIOD, DEFAULT_SHAKE_TIMES);
+}
+
+int get_shake_interval()
+{
+  return shake.period / (2 * 2 * shake.least_times);
+}
+
+bool is_shake(acc_list_t *trace, int least_times, int least_acc) 
+{
+  int neg = 0, pos = 0;
+
+  for(acc_list_t::iterator itr = trace->begin();
+      itr != trace->end();
+      itr++) {
+
+    if(-1 * least_acc <= *itr && *itr <= least_acc)
+      continue;
+
+    if(*itr > 0)
+      pos++;
+    else
+      neg++;
+  }
+
+  int min = (pos > neg) ? neg : pos;
+
+  return (min >= least_times);
+}
+
+void print_shake_trace(acc_list_t *trace)
+{
+  printf("[ ");
+
+  for(acc_list_t::iterator itr = trace->begin();
+      itr != trace->end();
+      itr++) {
+    printf("%d ", *itr);
+  }
+
+  printf("]");
+}
+
+void detect_shake(int ax, int ay, int az, motion_shake_cb_t scb)
+{
+  static bool is_shaking = false;
+
+#ifdef DEBUG_SHAKE
+  printf("X: ");
+  print_shake_trace(&shake.x_trace);
+  printf("\n");
+
+  printf("Y: ");
+  print_shake_trace(&shake.y_trace);
+  printf("\n");
+#endif
+
+  if(shake.count < shake.length) {
+    shake.x_trace.push_back(ax);
+    shake.y_trace.push_back(ay);
+    shake.count++;
+    return;
+  }
+
+  bool this_shaking = (is_shake(&(shake.x_trace), shake.least_times, shake.least_acc) 
+                      || is_shake(&(shake.y_trace), shake.least_times, shake.least_acc));
+
+  if(is_shaking) {
+    if(this_shaking) {
+      // continue shaking 
+    } else {
+      is_shaking = false;
+      scb(false);
+    }
+  } else {
+    if(this_shaking) {
+      is_shaking = true;
+      scb(true);
+    } else {
+      // nothing to do
+    }
+  }
+
+  // clear shake traces 
+  shake.x_trace.clear();
+  shake.y_trace.clear();
+  shake.count = 0;
+
+}
+
+void mug_config_shake(handle_t handle, int period, int times)
+{
+  mug_set_shake(period, times);
+}
 
 void run_motion_timer(uv_timer_t *req, int status)
 {
@@ -185,6 +335,11 @@ void run_motion_timer(uv_timer_t *req, int status)
                            &angle_x, &angle_y, &angle_z);
       (motion->acb)(angle_x, angle_y, angle_z);
     }
+
+    if(motion->scb != NULL) {
+      detect_shake(data->ax, data->ay, data->az, motion->scb);
+    }
+
   }
 
 }
@@ -204,8 +359,20 @@ void mug_motion_angle_on(handle_t handle, motion_angel_cb_t acb)
   reqm->acb = acb;
 }
 
+void mug_motion_shake_on(handle_t handle, motion_shake_cb_t scb)
+{
+  reqm->scb = scb;
+  init_shake();
+}
+
 void mug_run_motion_watcher(handle_t handle)
 {
+  if(reqm->scb) {
+    if(shake.least_times < 0) {
+
+    }
+  }
+
   uv_timer_start(&motion_timer, run_motion_timer, 0, reqm->interval);
   uv_run(motion_loop, UV_RUN_DEFAULT);
 }

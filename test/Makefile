@@ -1,4 +1,4 @@
-PACKS=fish temperature motion get_ip touch_trace mole show_id mug_shut_down player tile battery drink
+PACKS=fish temperature motion get_ip touch_trace mole show_id mug_shut_down player tile battery drink dice
 TOOLS=stop_mcu_flush mug_shut_down
 
 TESTS= $(PACKS) show_raw show_raw_N animation show_image touch image_to_raw stop_mcu_flush text mug_shut_down show_id tile battery
