@@ -112,22 +112,26 @@ void draw_data(int t, char *color)
 void disp_start()
 {
     if(!disp) return;
-    
+
+    char buf[16];
+    sprintf(buf, "%d", summary.count);
+
     clear_canvas();
-    canvas.draw_rectangle(0, 0, 0,
-                          SCREEN_WIDTH/4, SCREEN_HEIGHT/4, 0,
-                          green);
+    mug_draw_number_str_cimg((cimg_handle_t)&canvas, 0, 0, buf, "yellow");
+ 
     mug_disp_cimg(disp_handle, (cimg_handle_t)&canvas);
 }
 
-void disp_stop()
+void disp_stop(bool ok)
 {
     if(!disp) return;
     
+    char buf[16];
+    sprintf(buf, "%d", summary.count);
+
     clear_canvas();
-    canvas.draw_rectangle(0, 0, 0,
-                          SCREEN_WIDTH/4, SCREEN_HEIGHT/4, 0,
-                          red);
+    mug_draw_number_str_cimg((cimg_handle_t)&canvas, 0, 0, buf, ok? "magenta":"green");
+    
     mug_disp_cimg(disp_handle, (cimg_handle_t)&canvas);
 }
 
@@ -319,7 +323,6 @@ void start_trace()
 
 void stop_trace()
 {
-    disp_stop();
     trace.is_drinking = false;
     time(&trace.end_time);
     trace.dur_time = trace.end_time - trace.begin_time;
@@ -329,12 +332,14 @@ void stop_trace()
     if(trace.dur_time < config.dur_time) {
         printf("abondon trace due to duration time %d < %d\n",trace.dur_time, config.dur_time);
         clear_trace();
+        disp_stop(false);
         return;
     }
     
     if(trace.min_deg > config.min_deg) {
         printf("abondon trace due to min_deg %d > %d\n", trace.min_deg, config.min_deg);
         clear_trace();
+        disp_stop(false);
         return;
     }
     
@@ -343,6 +348,7 @@ void stop_trace()
     //dump_trace(fp);
     dump_trace(stdout);
     write_trace(trace.end_time);
+    disp_stop(true);
 }
 
 void on_signal(int signo)
@@ -383,7 +389,7 @@ void on_motion_angle(float angle_x, float angle_y, float angle_z)
         if((int)angle_z < trace.min_deg)
             trace.min_deg = (int)angle_z;
         
-        trace.degree_list.push_back(angle_z);
+        //trace.degree_list.push_back(angle_z);
     }
 
 }
@@ -395,6 +401,7 @@ void on_touch(touch_event_t e, int x, int y, int id)
         trace.catch_it = true;
     }
 }
+
 
 int main(int argc, char** argv)
 {
@@ -424,7 +431,9 @@ int main(int argc, char** argv)
         touch_handle = mug_touch_init();
         mug_touch_event_on(touch_handle, TOUCH_EVENT_ALL, on_touch);
     }
-    
+   
+    disp_start();
+ 
     motion_handle = mug_motion_init();
     mug_motion_angle_on(motion_handle, on_motion_angle);
     mug_set_motion_timer(motion_handle, 200);

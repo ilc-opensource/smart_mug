@@ -61,7 +61,7 @@ int read_with_timeout(handle_t handle, cmd_t cmdtype, char *data, int message_le
   rv = select(hdl + 1, &set, NULL, NULL, &timeout);
 
   if(rv < 0) {
-    printf("select err: %d, %s\n", errno, strerror(errno));
+    //printf("select err: %d, %s\n", errno, strerror(errno));
   }
 
   if(rv > 0) {
