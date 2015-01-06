@@ -50,6 +50,7 @@ mug_error_t mug_disp_raw(handle_t handle, char* imgData)
   return err;
 }
 
+char lastImg[COMPRESSED_SIZE];
 mug_error_t mug_disp_raw_N(handle_t handle, char* imgData, int number, int interval)
 {
   int semResource = resource_init(LOCK_DISPLAY_TOUCH);
@@ -58,6 +59,15 @@ mug_error_t mug_disp_raw_N(handle_t handle, char* imgData, int number, int inter
   int i;
   resource_wait(semResource);
   for(i = 0; i < number; i++) {
+    int isDiff = memcmp(lastImg, p, COMPRESSED_SIZE);
+    if (isDiff == 0) {
+      p += COMPRESSED_SIZE;
+      usleep(interval * 1000);
+      continue;
+    } else {
+      memcpy(lastImg, p, COMPRESSED_SIZE);
+    }
+
     error = mug_disp_raw(handle, p);
 
     if(error != ERROR_NONE) {
