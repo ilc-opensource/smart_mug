@@ -59,14 +59,16 @@ mug_error_t mug_disp_raw_N(handle_t handle, char* imgData, int number, int inter
   int i;
   resource_wait(semResource);
   for(i = 0; i < number; i++) {
-    /*int isDiff = memcmp(lastImg, p, COMPRESSED_SIZE);
+#ifdef FILTER_SAME_IMAGE_OF_ONE_PROCESS
+    int isDiff = memcmp(lastImg, p, COMPRESSED_SIZE);
     if (isDiff == 0) {
       p += COMPRESSED_SIZE;
       usleep(interval * 1000);
       continue;
     } else {
       memcpy(lastImg, p, COMPRESSED_SIZE);
-    }*/
+    }
+#endif
 
     error = mug_disp_raw(handle, p);
 
