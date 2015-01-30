@@ -11,6 +11,9 @@ var appProcess = child_process.execFile(path.join(__dirname, 'dice'));
 
 // Touch event handler begin
 // For none js app only
+
+io.setFrontEndApp(appProcess.pid);
+
 io.touchPanel.on('touchEvent', function(e, x, y, id) {
   if (e == 'TOUCH_HOLD') {
     //console.log(logPrefix+'kill the main app pid='+appProcess.pid);

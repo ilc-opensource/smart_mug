@@ -4,7 +4,7 @@
 #include <mug.h>
 #define _print(...) fprintf(fp, __VA_ARGS__)
 
-//#define DISP
+#define DISP
 
 int main(int argc, char** argv)
 {

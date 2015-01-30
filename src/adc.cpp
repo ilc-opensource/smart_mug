@@ -207,7 +207,7 @@ int voltage_to_percent(uint16_t data, bool *is_charging)
     last = v2p;
   }
 
-  return -1;
+  return last.percent;
 }
 
 mug_error_t mug_read_adc(handle_t handle, adc_raw_t *data)
@@ -301,7 +301,9 @@ int mug_battery_on(handle_t handle, battery_cb_t cb, int interval)
 
 void mug_run_adc_watcher(handle_t handle)
 {
+//#ifndef BUILD_NODE_ADDON
   uv_run(temp_loop, UV_RUN_DEFAULT);
+//#endif
 }
 
 void mug_run_temp_watcher(handle_t handle)

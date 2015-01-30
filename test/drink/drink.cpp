@@ -11,6 +11,7 @@
 
 #include <string>
 #include <list>
+#include <algorithm>
 using namespace std;
 
 #include <CImg.h>
@@ -250,8 +251,13 @@ void init_trace()
         while(fscanf(fp, "%d", &when) != EOF) {
 	
             printf("%d\n",when);
-            if(when >= config.start_time)
-                collects.push_back(when);
+            if(when >= config.start_time) {
+                if(find(collects.begin(), collects.end(), when) != collects.end()) {
+                    printf("eliminate duplicate %d\n", when);                                        
+                } else {
+                    collects.push_back(when);
+                }
+            }
         }
         
         fclose(fp);

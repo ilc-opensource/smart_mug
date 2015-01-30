@@ -9,6 +9,8 @@ var logPrefix = '[app get_ip] '
 
 var appProcess = child_process.execFile(path.join(__dirname, 'get_ip'));
 
+io.setFrontEndApp(appProcess.pid);
+
 // Touch event handler begin
 // For none js app only
 io.touchPanel.on('touchEvent', function(e, x, y, id) {

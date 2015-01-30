@@ -38,8 +38,14 @@ int gen_rand()
 
 void on_shake(int start)
 {
+  static bool first_round = true;
   char buf[32];
 
+  if(first_round) {
+    mug_stop_marquee(disp_handle);
+    first_round = false;
+  }
+  
   if(start) {
     printf("===> shake start!\n");
     mug_disp_img(disp_handle, "busy.bmp");
@@ -61,8 +67,7 @@ int main(int argc, char** argv)
 
   init();
   
-  mug_set_text_marquee_style(MQ_PROLOG);
-  mug_disp_text_marquee_async(disp_handle, "shake!!", "magenta", 70, 1);
+  mug_disp_text_marquee_async(disp_handle, "shake!!", "magenta", 70, DISP_INFINITE);
 
   //mug_motion_on(motion_handle, on_motion);
   mug_motion_shake_on(motion_handle, on_shake);

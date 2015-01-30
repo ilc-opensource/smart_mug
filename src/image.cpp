@@ -627,6 +627,8 @@ void* thread_entry(void *param)
 void stop_marquee()
 {
   __sync_fetch_and_or(&force_stop_disp, 1);
+  LOCK_(&marquee_mutex);
+  UNLOCK_(&marquee_mutex);
 
 }
 
@@ -704,7 +706,8 @@ void mug_disp_cimg_marquee(handle_t handle, cimg_handle_t img, int interval, int
     p = buf;
     for(int i = 0; i < num; i++) {
 
-      mug_disp_raw(handle, p);
+      mug_disp_raw_N(handle, p, 1, 0);
+      //mug_disp_raw(handle, p);
       if(check_and_sleep(interval)) {
         goto end;
       }

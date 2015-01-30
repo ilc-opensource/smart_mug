@@ -374,7 +374,9 @@ void mug_run_motion_watcher(handle_t handle)
   }
 
   uv_timer_start(&motion_timer, run_motion_timer, 0, reqm->interval);
+#ifndef BUILD_NODE_ADDON
   uv_run(motion_loop, UV_RUN_DEFAULT);
+#endif
 }
 
 void motion_init(handle_t handle)

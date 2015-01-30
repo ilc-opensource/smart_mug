@@ -12,6 +12,8 @@ else
 C_FLAGS +=-O0 -g 
 endif
 
+NODE_C_FLAGS = $(C_FLAGS) -DBUILD_NODE_ADDON
+
 HAS_LIBUV = $(shell ls -d $(ROOT)/lib/libuv 2>/dev/null)
 
 LIBMUG=$(ROOT)/bin/libmug.a

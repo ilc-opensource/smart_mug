@@ -9,6 +9,8 @@ var logPrefix = '[app player] '
 
 var appProcess = child_process.execFile(path.join(__dirname, 'player'), ['../../../audio'], {'cwd':__dirname});
 
+io.setFrontEndApp(appProcess.pid);
+
 // Touch event handler begin
 // For none js app only
 io.touchPanel.on('touchEvent', function(e, x, y, id) {

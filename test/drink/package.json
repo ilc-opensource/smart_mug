@@ -2,7 +2,7 @@
   "name"   : "drink",
   "package": "com.intel.smart_mug.drink",
   "version": "0.0.1",
-  "icon"   : "icon.bmp",
+  "icon"   : "icon.jpg",
   "start"  : "app.js",
   "description": "drink monitor"
 }

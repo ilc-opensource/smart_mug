@@ -10,6 +10,10 @@
 #include <vector>
 #include <iostream>
 
+#define cimg_display 0 
+#include "CImg.h"
+using namespace cimg_library;
+
 #include <mug.h>
 #include <config.h>
 using namespace std;
@@ -183,7 +187,10 @@ void disp_vol()
  
   system(str.c_str());
 
-  mug_disp_text_marquee(disp_handle, buf, "yellow", 200, 1);
+  mug_set_text_marquee_style(MQ_NULL);
+  mug_disp_text_marquee(disp_handle, buf, "yellow", 500, 1);
+  mug_set_text_marquee_style(MQ_ALL);
+  
 }
 
 void volumn_up()

@@ -7,7 +7,9 @@ var sys = require('../../main/highLevelAPI/sys.js');
 
 var logPrefix = '[app battery] '
 
-var appProcess = child_process.execFile(path.join(__dirname, 'battery'));
+var appProcess = child_process.execFile(path.join(__dirname, 'battery'), [30]);
+
+io.setFrontEndApp(appProcess.pid);
 
 // Touch event handler begin
 // For none js app only

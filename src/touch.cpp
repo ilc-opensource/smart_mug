@@ -828,7 +828,9 @@ void uv_touch_timer(uv_timer_t *timer, int status)
 
 void mug_run_touch_thread(handle_t handle)
 {
+#ifndef BUILD_NODE_ADDON
   uv_run(touch_loop, UV_RUN_DEFAULT);
+#endif
 }
 
 void mug_wait_for_touch_thread(handle_t handle)
