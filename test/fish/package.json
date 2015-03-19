@@ -1,9 +1,0 @@
-{
-  "name"   : "fish",
-  "package": "com.intel.smart_mug.fish-for-health",
-  "version": "0.0.1",
-  "icon"   : "icon.bmp",
-  "iconJSON": "media.json",
-  "start"  : "app.js",
-  "description": "desc"
-}

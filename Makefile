@@ -12,7 +12,7 @@ TARGET=$(BIN_PATH)/libmug.a
 
 NODE_TARGET=$(BIN_PATH)/libmug_node.a
 
-SRCS=disp.cpp image.cpp mug.cpp motion.cpp touch.cpp adc.cpp res_manager.cpp io.cpp utf8.cpp cJSON.cpp config.cpp
+SRCS=disp.cpp image.cpp mug.cpp motion.cpp touch.cpp adc.cpp res_manager.cpp io.cpp utf8.cpp cJSON.cpp config.cpp bme280.cpp bme280_support.cpp vaselib.cpp
 
 OBJS=$(addprefix $(BUILD_PATH)/, $(SRCS:.cpp=.o))
 NODE_OBJS= $(addprefix $(BUILD_PATH)/, $(SRCS:.cpp=_node.o))

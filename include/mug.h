@@ -254,6 +254,23 @@ const char* mug_query_config_string(const char *key);
 // utils
 char*  get_proc_dir();
 
+void  vase_init();
+char* get_vase_json();
+
+//get the current Temperature,Humidity and Body Feel Temperature
+int get_Temp_Hum_FT(float *T,float *H,float *FT);
+
+int get_CO2_TVOC(int *co2,int *tvoc);
+
+int get_PM25_AQI(float *PM25,int *aqi);
+
+int get_Light(float *light,float *proximity);
+
+/* get the sound pressure level */
+int get_SPL(int *spl);
+
+int get_vase_data(struct timeval *ts,float *T,float *H,float *FT,int *co2,int *tvoc,float *pm25,int *aqi,float *light,int *spl);
+
 #ifdef __cplusplus
 }
 #endif

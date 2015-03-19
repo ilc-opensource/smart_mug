@@ -6,8 +6,8 @@ SRC_PATH=.
 BUILD_PATH=build
 
 ## Edit #######################################
-TARGET=$(BIN_PATH)/fish
-SRCS=fish.cpp
+TARGET=$(BIN_PATH)/vase_test
+SRCS=vase_test.cpp
 ###############################################
 
 OBJS=$(addprefix $(BUILD_PATH)/, $(SRCS:.cpp=.o))
